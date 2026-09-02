@@ -1,0 +1,54 @@
+# Citation metadata — GitHub renders this as "Cite this repository".
+#
+# The abstract deliberately carries the scope statement. Someone who encounters
+# this work only as a citation, with no access to the site, still learns that it
+# is a design study and that its figures are modelled rather than measured.
+# Keep that in any edit; it is the same guardrail the pages carry.
+cff-version: 1.2.0
+title: "PulseMask: a photo-fitted respirator-form wearable-art design study"
+message: "If you reference this work, please cite it as below."
+type: software
+
+authors:
+  - given-names: Zach
+    family-names: Auerbach
+    orcid: "https://orcid.org/0009-0001-3046-9104"
+    affiliation: "Aurelius Dynamic"
+    email: build@aureliusdynamic.com
+
+repository-code: "https://github.com/ZachBach/helixPulse"
+url: "https://github.com/ZachBach/helixPulse"
+abstract: >-
+  A browser-based parametric generator that produces printable, watertight
+  respirator-form geometry from a single portrait photograph and an
+  interpupillary distance, published as a wearable-art design study. The
+  geometry engine is dependency-free and runs identically in a browser and
+  headless in Node, emitting 30 named closed meshes with STL, OBJ and GLB
+  export. Rendering uses WebGPU with TSL node materials. Accompanying material
+  documents the photogrammetric fit pipeline, an enclosed UV-C reactor concept
+  and a piezoelectric transducer array.
+
+  Scope, stated as part of the record: this is NOT a respirator, NOT personal
+  protective equipment and NOT a medical device. It is untested to NIOSH
+  42 CFR 84, EN 136, EN 143 and ISO 16900, has no regulatory clearance, and
+  provides no respiratory protection of any kind. All germicidal,
+  log-reduction and capsid-disruption figures are MODELLED, NEVER MEASURED,
+  including the reported ultraviolet dose of 0.22 mJ/cm2, which is
+  approximately 7 percent of the 3.0 mJ/cm2 target for two-log inactivation
+  and is published unrounded as a negative result. Single-image capture cannot
+  recover metric depth, so the fit is inferred, not validated.
+
+keywords:
+  - wearable art
+  - design study
+  - parametric geometry
+  - photogrammetry
+  - 3D printing
+  - WebGPU
+  - TSL
+  - three.js
+  - generative design
+
+license: LicenseRef-Proprietary
+version: "1.0.0"
+date-released: "2026-09-02"

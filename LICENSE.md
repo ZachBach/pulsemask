@@ -3,6 +3,7 @@
 Copyright © 2026 Zach Auerbach, trading as **Aurelius Dynamic**. All rights reserved.
 
 Contact: [build@aureliusdynamic.com](mailto:build@aureliusdynamic.com)
+ORCID: [0009-0001-3046-9104](https://orcid.org/0009-0001-3046-9104)
 
 > **Draft for review.** These terms were drafted to match what
 > [`pricing.html`](pricing.html) already promises customers. They are a starting point
