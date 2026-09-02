@@ -1,0 +1,65 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# pulseMask_Tech — what does NOT go to the public GitHub repo.
+#
+# This repo is the live site, so anything committed here is published. The split
+# below is "would I be happy for a customer or a competitor to read this?".
+# Nothing here is a credential — there are none in this project. It is business
+# strategy, internal process, and local machine state.
+#
+# To publish something again, delete its line and `git add -f` it.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Commercially sensitive ───────────────────────────────────────────────────
+# Unlaunched pricing, per-unit cost breakdown, margins and capacity.
+docs/founder-run.stash.md
+# Internal legal posture: personal liability, LLC/DBA reasoning, tax exposure.
+docs/licensing.md
+# Payment-processor setup, tax decisions, price-change plans, and the format
+# used to mint PMK- unlock codes.
+zookah.todos.md
+
+# Catch anything else dropped into docs/ — it is the internal-notes folder.
+# Re-publish individual files with `git add -f docs/<file>`.
+docs/
+
+# ── Internal engineering + process docs ──────────────────────────────────────
+# Useful to me and to agents, not to visitors. HANDOFF.md in particular spells
+# out that the export gate is a soft storefront gate rather than DRM, and both
+# it and the playbook describe unshipped work.
+HANDOFF.md
+VSCODE.md
+AGENT_PLAYBOOK.md
+CLAUDE.md
+CLAUDE_DESIGN_BUNDLE.md
+
+# ── Generated output ─────────────────────────────────────────────────────────
+export/
+*.stl
+*.obj
+*.glb
+
+# ── Stale assets ─────────────────────────────────────────────────────────────
+# Screenshot of a superseded design (old hero copy, old nav, ungated exports).
+zooks-prot.webp
+
+# ── Local machine state ──────────────────────────────────────────────────────
+.vscode/
+.hintrc
+.idea/
+*.code-workspace
+
+# ── Ordinary hygiene ─────────────────────────────────────────────────────────
+node_modules/
+.env
+.env.*
+*.local
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+npm-debug.log*
+.cache/
+tmp/
+*.tmp
+*.bak
+*~

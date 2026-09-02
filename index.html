@@ -1,0 +1,1445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PulseMask — wearable art generated from one photograph · Aurelius Dynamic</title>
+<meta name="description" content="A design study in respirator form, sold as wearable art. Upload a portrait, generate printable 3D geometry, read every engineering figure behind it. Not PPE, not a respirator, not a medical device.">
+<meta property="og:title" content="PulseMask — wearable art generated from one photograph">
+<meta property="og:description" content="A design study in respirator form. The geometry is real and printable; the germicidal figures are modelled and they fail. Both are on the page.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2307090A'/%3E%3Cpath d='M18 10h28v33L32 54 18 43z' fill='%236EFF3C'/%3E%3C/svg%3E">
+<script>/* apply the saved theme before first paint; the module script below still
+   owns the theme button and stage background — this only prevents a flash */
+try{document.documentElement.dataset.theme=localStorage.getItem('pulsemask.theme')||'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Track 3 · WebGPU + TSL. Still one pinned, integrity-checked map and still
+     exactly ONE copy of three.js: "three" and "three/webgpu" resolve to the
+     same three.webgpu.js URL, so there is a single module instance. That build
+     re-exports the whole core (three.core.js, relative import, hashed below)
+     and adds the node system, which is why the addons keep resolving — they
+     import bare "three" and nothing else.
+
+     "three/webgpu" is not decorative: three.tsl.js imports that exact bare
+     specifier, so the map breaks without it.
+
+     Note what this build does NOT export: WebGLRenderer. The fallback here is
+     WebGPURenderer's own WebGL2 backend, not the old renderer. shader-lab.html
+     keeps the classic map until its 34 GLSL designs are ported to TSL.
+
+     Hashes are sha384 of the exact bytes served by these URLs, regenerated
+     with: curl -sL <url> | openssl dgst -sha384 -binary | openssl base64 -A -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.184.0/build/three.webgpu.js",
+    "three/webgpu": "https://unpkg.com/three@0.184.0/build/three.webgpu.js",
+    "three/tsl": "https://unpkg.com/three@0.184.0/build/three.tsl.js",
+    "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js",
+    "three/addons/exporters/OBJExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js",
+    "three/addons/exporters/GLTFExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js"
+  },
+  "integrity": {
+    "https://unpkg.com/three@0.184.0/build/three.webgpu.js": "sha384-vatRh9vQy/B/ECoJSF7P/Jg9rF6KVuG/ovU+3Wp/BUaCcpR0DM+a4zCEbQ8Y/RFK",
+    "https://unpkg.com/three@0.184.0/build/three.tsl.js": "sha384-dqftyqccaI6qYFdGtJtugSSe4YKncDgGHttpZJr+lR/vSq18VR5ubqlzEHdGLdJ1",
+    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT",
+    "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js": "sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js": "sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js": "sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ"
+  }
+}
+</script>
+<style>
+  :root{
+    --neon:#6EFF3C; --neon-2:#00E58A; --neon-ink:#0E8F35; --hz:#B57BFF;
+    --bg:#07090A; --bg-2:#0A0D0E; --panel:#0E1214; --panel-2:#131A1C;
+    --line:rgba(110,255,60,.14); --line-2:rgba(110,255,60,.30); --hair:rgba(255,255,255,.07);
+    --ink:#E6F2E4; --mid:#8FA394; --dim:#5A6B60;
+    --amber:#FFC24B; --good:#6EFF3C; --bad:#FF5C6E;
+    --glow:0 0 22px -6px var(--neon);
+    --grid:rgba(110,255,60,.045);
+    --stage:#0A0F10;
+    --bevel:polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 11px 100%, 0 calc(100% - 11px));
+  }
+  [data-theme="light"]{
+    --neon:#2FD41F; --neon-2:#00B36B; --neon-ink:#0B7A2C; --hz:#7A4FE0;
+    --bg:#EEF2EC; --bg-2:#F6F9F4; --panel:#FFFFFF; --panel-2:#F1F5EF;
+    --line:rgba(20,60,25,.16); --line-2:rgba(47,212,31,.55); --hair:rgba(20,40,25,.10);
+    --ink:#0C1410; --mid:#4A5A4E; --dim:#7C8C80;
+    --amber:#B87400; --good:#1B9E2A; --bad:#C8342F;
+    --glow:0 0 18px -8px rgba(47,212,31,.9);
+    --grid:rgba(20,60,25,.05);
+    --stage:#E9EEE7;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:64px}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif; font-size:15px; line-height:1.55;
+    -webkit-font-smoothing:antialiased; text-wrap:pretty;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+                     linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:34px 34px;
+    transition:background-color .25s, color .25s;
+  }
+  a{color:var(--neon); text-decoration:none}
+  [data-theme="light"] a{color:var(--neon-ink)}
+  a:hover{color:var(--neon-2)}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  .eyebrow{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--neon); opacity:.85}
+  three-d-stage:not(:defined){visibility:hidden}
+
+  header{
+    position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:16px;
+    padding:0 22px; height:56px; background:color-mix(in srgb, var(--bg) 86%, transparent);
+    -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--line);
+    box-shadow:0 1px 0 0 color-mix(in srgb, var(--neon) 22%, transparent);
+  }
+  .brand{display:flex; align-items:center; gap:9px; font-family:"Chakra Petch",sans-serif;
+    font-weight:700; font-size:17px; letter-spacing:.06em; text-transform:uppercase;
+    white-space:nowrap; flex:0 0 auto}
+  .brand i{width:7px; height:16px; background:var(--neon); box-shadow:var(--glow);
+    display:block; clip-path:polygon(0 0,100% 0,100% 72%,50% 100%,0 72%)}
+  .brand small{font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.16em;
+    color:var(--dim); text-transform:uppercase; font-weight:400; padding-left:9px;
+    border-left:1px solid var(--hair); white-space:nowrap}
+  .wip{
+    font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--amber); border:1px solid color-mix(in srgb, var(--amber) 45%, transparent);
+    background:color-mix(in srgb, var(--amber) 10%, transparent);
+    padding:4px 10px; white-space:nowrap;
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+  }
+  nav{margin-left:auto; display:flex; gap:2px; align-items:center}
+  nav a{
+    font-family:"Chakra Petch",sans-serif; font-size:12.5px; font-weight:500; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--mid); padding:7px 12px; border:1px solid transparent;
+    white-space:nowrap;
+  }
+  nav a:hover{color:var(--ink); border-color:var(--line-2); box-shadow:var(--glow)}
+  [data-theme="light"] nav a{color:var(--mid)}
+  [data-theme="light"] nav a:hover{color:var(--ink)}
+  [data-theme="light"] .brand{color:var(--ink)}
+  [data-theme="light"] a.btn:not(.primary){color:var(--ink)}
+  #themeBtn{
+    margin-left:10px; font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.14em;
+    text-transform:uppercase; padding:7px 11px; background:transparent; cursor:pointer;
+    border:1px solid var(--line-2); color:var(--neon);
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+  }
+  #themeBtn:hover{background:color-mix(in srgb, var(--neon) 12%, transparent); box-shadow:var(--glow)}
+
+  /* persistent artwork-status band. Static here rather than sticky, because the
+     right column's sticky offset is measured off the 56px header — a wrapping
+     band would drift that math. The sibling pages are single-column and pin it. */
+  .artband{
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:9px 22px; font-family:"IBM Plex Mono",monospace; font-size:11px; line-height:1.45;
+    color:var(--amber);
+    background:color-mix(in srgb, var(--amber) 11%, var(--bg));
+    border-bottom:1px solid color-mix(in srgb, var(--amber) 40%, transparent);
+  }
+  .artband b{letter-spacing:.18em; text-transform:uppercase; font-weight:600; font-size:10px;
+    border:1px solid color-mix(in srgb, var(--amber) 50%, transparent); padding:3px 8px;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .artband span{color:var(--mid)}
+  .artband span strong{color:var(--amber); font-weight:600}
+  .artband a{color:var(--amber); text-decoration:underline; text-underline-offset:3px}
+
+  /* in-page jump chips under the hero — the sections nav no longer carries */
+  .jump{display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 4px}
+  .jump a{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.12em;
+    text-transform:uppercase; border:1px solid var(--line); color:var(--mid); padding:7px 11px;
+    text-decoration:none;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .jump a:hover{color:var(--ink); border-color:var(--line-2); box-shadow:var(--glow)}
+
+  .work{display:grid; grid-template-columns:minmax(0,1fr) minmax(520px,1.15fr);
+    align-items:start; border-bottom:1px solid var(--line)}
+  .flow{padding:0 0 90px}
+  .stagewrap{position:sticky; top:56px; height:calc(100vh - 56px); border-left:1px solid var(--line);
+    background:var(--stage); display:flex; flex-direction:column; min-width:0}
+  .stagewrap::before{
+    content:''; position:absolute; inset:0; pointer-events:none; z-index:2;
+    background:repeating-linear-gradient(0deg,transparent 0 3px,color-mix(in srgb, var(--neon) 5%, transparent) 3px 4px);
+    opacity:.5;
+  }
+  .stagewrap::after{
+    content:''; position:absolute; inset:14px; pointer-events:none; z-index:3;
+    border:1px solid color-mix(in srgb, var(--neon) 26%, transparent);
+    clip-path:polygon(0 0,26px 0,26px 1px,1px 1px,1px 26px,0 26px,
+      100% 0,100% 26px,calc(100% - 1px) 26px,calc(100% - 1px) 1px,calc(100% - 26px) 1px,calc(100% - 26px) 0,
+      0 100%,26px 100%,26px calc(100% - 1px),1px calc(100% - 1px),1px calc(100% - 26px),0 calc(100% - 26px),
+      100% 100%,calc(100% - 26px) 100%,calc(100% - 26px) calc(100% - 1px),calc(100% - 1px) calc(100% - 1px),calc(100% - 1px) calc(100% - 26px),100% calc(100% - 26px));
+  }
+  three-d-stage{flex:1; min-height:0}
+  .stagebar{display:flex; align-items:center; gap:10px; padding:10px 14px;
+    border-top:1px solid var(--line); background:var(--panel); font-size:11.5px;
+    color:var(--mid); flex-wrap:wrap; position:relative; z-index:4}
+  .chips{display:flex; gap:5px; flex-wrap:wrap}
+  .chip{
+    font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    padding:6px 11px; border:1px solid var(--line); background:transparent; color:var(--mid); cursor:pointer;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px));
+    transition:color .12s, border-color .12s, box-shadow .12s;
+  }
+  .chip:hover{color:var(--ink); border-color:var(--line-2)}
+  .chip[aria-pressed="true"]{background:var(--neon); border-color:var(--neon); color:#04140A;
+    font-weight:600; box-shadow:var(--glow)}
+  .stagestat{margin-left:auto; font-family:"IBM Plex Mono",monospace; font-size:10px;
+    letter-spacing:.06em; color:var(--neon); opacity:.8}
+
+  section{padding:46px 40px; border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:0}
+  h1{font-family:"Chakra Petch",sans-serif; font-size:38px; line-height:1.08; letter-spacing:-.01em;
+    margin:12px 0 16px; font-weight:700; max-width:17ch; text-transform:uppercase}
+  h2{font-family:"Chakra Petch",sans-serif; font-size:23px; letter-spacing:.01em; margin:0 0 8px;
+    font-weight:600; text-transform:uppercase}
+  h3{font-family:"Chakra Petch",sans-serif; font-size:14.5px; margin:0 0 6px; font-weight:600;
+    letter-spacing:.04em; text-transform:uppercase}
+  p{margin:0 0 12px; color:var(--mid); max-width:62ch}
+  p strong{color:var(--ink); font-weight:600}
+  em{color:var(--neon); font-style:normal}
+
+  .step{display:flex; align-items:baseline; gap:14px; margin:0 0 20px}
+  .num{font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--neon);
+    letter-spacing:.1em; padding-top:2px; min-width:24px}
+
+  .ctl{margin:0 0 16px}
+  .ctl label{display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+    font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--dim); margin-bottom:7px}
+  .ctl label b{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--neon);
+    font-weight:500; letter-spacing:.02em; text-transform:none}
+  input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:1px;
+    background:var(--line-2); outline:none; cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:12px; height:12px;
+    background:var(--neon); cursor:pointer; box-shadow:var(--glow);
+    clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+  input[type=range]::-moz-range-thumb{width:12px; height:12px; background:var(--neon);
+    border:0; cursor:pointer; clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+  input[type=number]{width:78px; background:var(--panel-2); border:1px solid var(--line);
+    color:var(--neon); font-family:"IBM Plex Mono",monospace; font-size:12px; padding:6px 9px}
+  input[type=number]:focus{outline:none; border-color:var(--neon); box-shadow:var(--glow)}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:0 18px}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    padding:12px 16px; border:1px solid var(--line-2); background:transparent; color:var(--ink);
+    cursor:pointer; width:100%;
+    clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+  }
+  .btn:hover{background:color-mix(in srgb, var(--neon) 10%, transparent); box-shadow:var(--glow)}
+  .btn.primary{background:var(--neon); border-color:var(--neon); color:#04140A; font-weight:600;
+    box-shadow:var(--glow)}
+  .btn.primary:hover{background:var(--neon-2); border-color:var(--neon-2)}
+
+  .card{background:var(--panel); border:1px solid var(--line); padding:20px 22px; margin:0 0 16px;
+    clip-path:var(--bevel); position:relative}
+  .card h3{margin-bottom:12px; color:var(--neon)}
+
+  .drop{border:1px dashed var(--line-2); padding:28px 18px; text-align:center; color:var(--dim);
+    font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.06em; cursor:pointer;
+    background:var(--panel-2)}
+  .drop:hover{border-color:var(--neon); color:var(--neon); box-shadow:var(--glow)}
+  .drop.on{border-color:var(--neon); background:color-mix(in srgb, var(--neon) 8%, transparent)}
+  #lmWrap{position:relative; display:none; margin-top:12px}
+  #lmCanvas{width:100%; display:block; background:#000; border:1px solid var(--line); cursor:crosshair;
+    touch-action:none}
+  #hmCanvas{width:88px; height:110px; border:1px solid var(--line-2);
+    image-rendering:pixelated; background:var(--panel-2); box-shadow:var(--glow)}
+
+  .mgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(172px,1fr)); gap:1px;
+    background:var(--line); border:1px solid var(--line)}
+  .m{background:var(--panel); padding:16px 18px; position:relative}
+  .m .k{font-family:"IBM Plex Mono",monospace; font-size:9px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--dim); margin-bottom:9px}
+  .m .v{font-family:"IBM Plex Mono",monospace; font-size:22px; letter-spacing:-.02em; color:var(--ink)}
+  .m .v span{font-size:10.5px; color:var(--dim); margin-left:4px; letter-spacing:.06em}
+  .m .n{font-size:10.5px; color:var(--dim); margin-top:6px; line-height:1.45}
+  .m.flag .v{color:var(--bad); text-shadow:0 0 18px color-mix(in srgb, var(--bad) 55%, transparent)}
+  .m.warn .v{color:var(--amber)}
+  .m.ok .v{color:var(--neon); text-shadow:var(--glow)}
+  .bar{height:2px; background:var(--hair); margin-top:10px; overflow:hidden}
+  .bar i{display:block; height:100%; background:var(--neon); width:0; box-shadow:var(--glow)}
+  .m.flag .bar i{background:var(--bad)}
+
+  .rm{display:grid; gap:1px; background:var(--line); border:1px solid var(--line)}
+  .rm > div{background:var(--panel); padding:17px 20px; display:grid;
+    grid-template-columns:82px 140px 1fr auto; gap:18px; align-items:baseline}
+  .rm > div:hover{background:var(--panel-2)}
+  .pill{font-family:"IBM Plex Mono",monospace; font-size:9px; letter-spacing:.16em; text-transform:uppercase;
+    padding:4px 9px; border:1px solid var(--line); color:var(--dim); justify-self:end; white-space:nowrap;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .pill.now{color:var(--amber); border-color:color-mix(in srgb, var(--amber) 45%, transparent);
+    background:color-mix(in srgb, var(--amber) 10%, transparent)}
+  .pill.done{color:var(--neon); border-color:var(--line-2);
+    background:color-mix(in srgb, var(--neon) 10%, transparent)}
+  .cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:24px}
+  footer{padding:36px 40px 64px; color:var(--dim); font-size:12px}
+  footer p{color:var(--dim); font-size:12px; max-width:76ch}
+  hr{border:0; border-top:1px solid var(--line); margin:26px 0}
+  @media (max-width:1340px){ .brand small{display:none} }
+  @media (max-width:1410px){ nav a{padding:7px 8px; font-size:11.5px} .wip{font-size:9px; padding:4px 7px} }
+  @media (max-width:1080px){
+    html{scroll-padding-top:128px}
+    .work{grid-template-columns:minmax(0,1fr)}
+    .stagewrap{position:relative; top:0; height:74vh; border-left:0; border-top:1px solid var(--line)}
+    section{padding:34px 22px}
+    h1{font-size:30px}
+    header{flex-wrap:wrap; height:auto; min-height:56px; padding:8px 14px; row-gap:4px}
+    nav{flex-wrap:wrap; justify-content:flex-end}
+  }
+  @media (max-width:760px){
+    /* roadmap rows: fixed 82/140px columns overflow phones — reflow to
+       phase + pill on the first row, name and description full-width below */
+    .rm > div{grid-template-columns:minmax(0,1fr) auto}
+    .rm > div > :nth-child(1){grid-row:1; grid-column:1}
+    .rm > div > :nth-child(4){grid-row:1; grid-column:2}
+    .rm > div > :nth-child(2), .rm > div > :nth-child(3){grid-column:1 / -1}
+  }
+
+  /* ── Touch & small-screen pass ────────────────────────────────────────────
+     Measured, not guessed. At 390px wide the chips, mini-buttons, theme
+     toggle and number inputs all came in under 32px tall, the slider's hit
+     box was its 1px track, and the 7-link nav wrapped to three rows — 117px
+     of header on a phone, 181px at 320px.
+
+     Two separate concerns, so two separate queries.
+
+     Layout is about width: below 760px the nav stops wrapping, takes its own
+     full-width row and scrolls sideways, which buys back a third of the
+     header. */
+  @media (max-width:760px){
+    nav{
+      flex:1 1 100%; margin-left:0; flex-wrap:nowrap; justify-content:flex-start;
+      overflow-x:auto; overscroll-behavior-x:contain;
+      scrollbar-width:none; -ms-overflow-style:none;
+    }
+    nav::-webkit-scrollbar{display:none}
+    nav a{flex:0 0 auto}
+    #themeBtn{flex:0 0 auto; margin-left:6px}
+  }
+
+  /* Target size is about the pointer, not the width — an iPad in portrait is
+     768px and still a thumb. pointer:coarse catches every touch device at any
+     size; the width clause keeps a narrow desktop window honest too.
+     40px floor: WCAG 2.5.8 asks 24px, but 40 is the comfortable floor for a
+     thumb and these are bevelled boxes with room to grow. Inline prose links
+     are deliberately untouched — they are exempt from the rule, and padding
+     them would wreck the line rhythm. */
+  @media (max-width:760px), (pointer:coarse){
+    nav a, #themeBtn{padding:11px 12px}
+    .chip, .btn, .mini, .toc a, .jump a, .prog button{
+      min-height:40px; display:inline-flex; align-items:center; justify-content:center;
+    }
+    input[type=number], input[type=text]{min-height:40px}
+
+    /* Grow the slider to 36px and repaint the same 1px line with a centred
+       gradient, so the look is unchanged and only the grab area moves. */
+    input[type=range]{
+      height:36px;
+      background:linear-gradient(var(--line-2),var(--line-2)) center/100% 1px no-repeat;
+    }
+    input[type=range]::-webkit-slider-runnable-track{height:36px; background:transparent}
+
+    /* The 12px diamond is the design; the label around it carries the hit
+       area, so grow the label rather than the control. */
+    .check{padding:15px 0; min-height:44px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><i></i>PulseMask <small>Pulse Lab · Aurelius Dynamic</small></div>
+  <div class="wip">Prototype · work in progress</div>
+  <nav>
+    <a href="#generator" aria-current="page">Generator</a>
+    <a href="mission.html">Mission</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="guide.html">Guide</a>
+    <a href="assembly.html">Assembly</a>
+    <a href="shader-lab.html">Shader Lab</a>
+    <a href="pricing.html">Pricing</a>
+    <button id="themeBtn" type="button">◐ Light</button>
+  </nav>
+</header>
+
+<div class="artband">
+  <b>Artwork</b>
+  <span>PulseMask is <strong>a design study sold as wearable art</strong> — a decorative prop.
+  It is not a respirator, not PPE, not a medical device, and it provides no protection of any
+  kind. Every performance figure below is <strong>modelled, never measured</strong>.
+  <a href="mission.html#isnot">Full scope statement</a></span>
+</div>
+
+<div class="work">
+  <div class="flow">
+
+    <section id="generator">
+      <div class="eyebrow">Unit 01 · Generator</div>
+      <h1>Wearable art, generated from one photograph.</h1>
+      <p>Upload a front-facing portrait and mark five landmarks. The system scales an
+      anthropometric face model to your measurements, adds surface relief recovered from the
+      photograph, and grows a sealing shell onto it — then hands you a printable STL in
+      millimetres.</p>
+      <p><strong>It is a design study in respirator form, and it is sold as art.</strong> The
+      geometry is genuinely engineered — real parameters, real physics, real printable output. The
+      air-treatment side of the idea does not yet work, and rather than hide that, the failing
+      number is on this page in three places. <a href="mission.html">Read the mission and the
+      current status.</a></p>
+      <p><strong>What this is not:</strong> single-image capture cannot recover true metric depth.
+      Landmarks set the proportions; photometric relief adds surface detail. A validated fit
+      needs a depth scan or a plaster cast. Nothing here is a respirator, PPE or a medical
+      device, and nothing here protects you from anything.</p>
+
+      <div class="jump">
+        <a href="#operation">Operation</a>
+        <a href="#engineering">Engineering readout</a>
+        <a href="#roadmap">Roadmap</a>
+        <a href="#case">Design notes</a>
+        <a href="mission.html">Mission &amp; status</a>
+        <a href="assembly.html">Assembly walkthrough</a>
+      </div>
+
+      <div class="card">
+        <h3>01 · Portrait</h3>
+        <div class="drop" id="drop" role="button" tabindex="0"
+          aria-label="Upload a front-facing portrait">Drop a front-facing portrait, or click to choose
+          <input type="file" id="file" accept="image/*" hidden></div>
+        <div id="lmWrap">
+          <canvas id="lmCanvas"></canvas>
+        </div>
+        <div style="display:flex; gap:16px; align-items:flex-end; margin-top:14px">
+          <div class="ctl" style="flex:1; margin:0">
+            <label for="ipd">Interpupillary distance <b class="mono">mm</b></label>
+            <input type="number" id="ipd" value="63" min="48" max="78" step="0.5">
+            <div class="n mono" style="font-size:10.5px; color:var(--dim); margin-top:6px">
+              The one real-world measurement that sets absolute scale. Measure it, or use your
+              optician's PD.</div>
+          </div>
+          <div>
+            <div class="eyebrow" style="margin-bottom:6px">Relief map</div>
+            <canvas id="hmCanvas" width="88" height="110"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>02 · Fit</h3>
+        <div class="grid2">
+          <div class="ctl"><label for="s_fw">Face width <b><span id="v_fw">140</span> mm</b></label>
+            <input type="range" id="s_fw" min="118" max="168" step="1" value="140"></div>
+          <div class="ctl"><label for="s_fh">Nasion–menton <b><span id="v_fh">122</span> mm</b></label>
+            <input type="range" id="s_fh" min="100" max="146" step="1" value="122"></div>
+          <div class="ctl"><label for="s_rel">Photometric relief <b><span id="v_rel">4.5</span> mm</b></label>
+            <input type="range" id="s_rel" min="0" max="9" step="0.5" value="4.5"></div>
+          <div class="ctl"><label for="s_ple">Breathing plenum <b><span id="v_ple">17</span> mm</b></label>
+            <input type="range" id="s_ple" min="8" max="26" step="0.5" value="17"></div>
+          <div class="ctl"><label for="s_wal">Shell wall <b><span id="v_wal">2.6</span> mm</b></label>
+            <input type="range" id="s_wal" min="1.6" max="4" step="0.1" value="2.6"></div>
+          <div class="ctl"><label for="s_sea">Seal bead ⌀ <b><span id="v_sea">8.4</span> mm</b></label>
+            <input type="range" id="s_sea" min="5" max="13" step="0.2" value="8.4"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>03 · UV-C reactor &amp; PZT array</h3>
+        <div class="grid2">
+          <div class="ctl"><label for="s_rl">Reactor length <b><span id="v_rl">28</span> mm</b></label>
+            <input type="range" id="s_rl" min="18" max="120" step="1" value="28"></div>
+          <div class="ctl"><label for="s_den">UV-C LED density <b><span id="v_den">6</span> / 10 mm</b></label>
+            <input type="range" id="s_den" min="2" max="14" step="1" value="6"></div>
+          <div class="ctl"><label for="s_lp">Optical power / LED <b><span id="v_lp">12</span> mW</b></label>
+            <input type="range" id="s_lp" min="4" max="30" step="1" value="12"></div>
+          <div class="ctl"><label for="s_ref">Labyrinth reflectance gain <b><span id="v_ref">2.6</span>×</b></label>
+            <input type="range" id="s_ref" min="1" max="6" step="0.1" value="2.6"></div>
+          <div class="ctl"><label for="s_flo">Design peak flow <b><span id="v_flo">85</span> L/min</b></label>
+            <input type="range" id="s_flo" min="30" max="120" step="5" value="85"></div>
+          <div class="ctl"><label for="s_pzt">PZT seal sensors <b><span id="v_pzt">6</span></b></label>
+            <input type="range" id="s_pzt" min="0" max="12" step="2" value="6"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>04 · Export</h3>
+        <p style="font-size:12.5px; margin-bottom:14px">Exports are part of a purchased tier.
+        Buy on the <a href="pricing.html">pricing page</a> and your files arrive by email —
+        or enter the unlock code from your order confirmation to export this browser's
+        generated mask directly. STL is written in millimetres with only the visible parts
+        included — use the face form and visor chips to choose what prints. New to it? The
+        <a href="guide.html">print guide</a> and the <a href="assembly.html">assembly
+        walkthrough</a> cover everything downstream of the download.</p>
+        <p style="font-size:12px; margin-bottom:14px; color:var(--amber)">These files produce a
+        decorative wearable-art piece. Not a respirator, not PPE, not a medical device; no
+        protection of any kind, and no electronics included or supported.</p>
+        <a class="btn primary" href="pricing.html" style="margin-bottom:10px">Buy · unlock exports</a>
+        <div style="display:flex; gap:8px; margin-bottom:10px">
+          <input type="text" id="unlockCode" placeholder="PMK-XXXX unlock code"
+            aria-label="Order unlock code" spellcheck="false"
+            style="flex:1; background:var(--panel-2); border:1px solid var(--line); color:var(--neon);
+            font-family:'IBM Plex Mono',monospace; font-size:12px; padding:9px 11px">
+          <button class="btn" id="unlockApply" type="button" style="width:auto">Unlock</button>
+        </div>
+        <div id="unlockState" class="mono" style="font-size:10.5px; color:var(--dim); margin-bottom:12px"></div>
+        <button class="btn primary" id="dlStl" type="button">Download STL · millimetres</button>
+        <div class="grid2" style="margin-top:8px; gap:8px">
+          <button class="btn" id="dlObj" type="button">OBJ + MTL</button>
+          <button class="btn" id="dlGlb" type="button">GLB</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="operation">
+      <div class="eyebrow">Unit 02 · Operation</div>
+      <h2>How the air is treated</h2>
+      <p>One chin canister, one pass, six PZT roles. Click a stage to drive the model.</p>
+      <div id="steps"></div>
+    </section>
+
+    <section id="engineering">
+      <div class="eyebrow">Unit 03 · Engineering readout</div>
+      <h2>Live from the current geometry</h2>
+      <p>These recompute on every change. The dose budget is the honest one — read it before
+      anything else.</p>
+      <div class="mgrid" id="metrics"></div>
+      <p style="margin-top:16px; font-size:12.5px">Inactivation model: <span class="mono">N/N₀ = e^(−k·D)</span>
+      with <span class="mono">k ≈ 1.2 cm²/mJ</span> for enveloped RNA virus at 265–280 nm, and a
+      55% LED-to-chamber coupling loss. Dwell time assumes plug flow at the design peak — a real
+      reactor has a residence-time distribution, so treat the figure as an upper bound.</p>
+    </section>
+
+  </div>
+
+  <div class="stagewrap">
+    <three-d-stage id="stage" name="pulsemask" background="#0A0F10" hide-toolbar></three-d-stage>
+    <div class="stagebar">
+      <div class="chips" id="viewChips"></div>
+      <div class="stagestat" id="stat">building…</div>
+    </div>
+  </div>
+</div>
+
+<section id="roadmap">
+  <div class="eyebrow">Roadmap</div>
+  <h2>Where this sits</h2>
+  <p>PulseMask is a research prototype inside Aurelius Dynamic, sold as wearable art while the
+  engineering question stays open. Nothing here is a certified respirator, PPE or a medical
+  device. Phases are gated on evidence, never on a calendar — nothing is marked complete because
+  a quarter ended.</p>
+  <div class="rm" id="rm"></div>
+  <p style="margin-top:16px; font-size:12.5px">Readiness, stated honestly: the <strong>device</strong>
+  sits at <span class="mono">TRL 2</span> — concept formulated, nothing built, no experiment run.
+  The <strong>generator</strong> sits at <span class="mono">TRL 5</span> — validated across two
+  independent hosts with matching output. <a href="mission.html#status">The full status breakdown,
+  with every number unrounded.</a></p>
+</section>
+
+<section id="case">
+  <div class="eyebrow">Case study</div>
+  <h2>Design notes</h2>
+  <div class="cols">
+    <div>
+      <h3>Why an inner oronasal cup</h3>
+      <p>A full-face shell with a wraparound visor has a large internal volume. Breathe into it
+      directly and you rebreathe CO₂ and fog the lens. The inner cup isolates the breathing
+      circuit: treated air enters the cup, exhaled air leaves through the cheek valves, and the
+      visor cavity is swept by a small bleed. Dead space drops from roughly a litre to the figure
+      in the readout.</p>
+    </div>
+    <div>
+      <h3>Why SLS nylon, not resin</h3>
+      <p>PA12 is tough where photopolymer is brittle. A resin shell that cracks at the visor
+      aperture during a fall is a failure mode with the user's eyes behind it. SLS also prints the
+      organic shell without supports, so no support scars land on the sealing face — that surface
+      has to be smooth or the bead leaks.</p>
+    </div>
+    <div>
+      <h3>The dose problem</h3>
+      <p>At 85 L/min peak inspiratory flow, air crosses a 28 mm reactor in about 27 ms. No
+      practical LED array delivers a germicidal dose in that window. The honest options are a
+      long folded labyrinth, a blower that decouples flow from breathing, or treating UV-C as a
+      filter-media steriliser between breaths rather than an inline kill stage. The sliders let
+      you find the boundary yourself. Note what the physics says: for a uniformly lit tube the
+      dose reduces to <span class="mono">P·η·ρ·r / 2Q</span> — reactor length alone buys nothing
+      unless you add emitters with it, which is why the slider is LED <em>density</em>.</p>
+    </div>
+    <div>
+      <h3>What the PZT array does</h3>
+      <p>Five roles, one driver: acoustic agitation in the reactor, ultrasonic coalescence ahead
+      of the filter to grow sub-micron aerosol into capturable droplets, seal-contact sensing for
+      live fit telemetry, blower assist, and breath energy harvesting at the exhale valves.
+      Capsid disruption by ultrasound is <em>theoretical here</em> — it needs bench validation
+      before it is claimed.</p>
+    </div>
+    <div>
+      <h3>What the horns actually carry</h3>
+      <p>The bore is about 11 mm at the base, so no 18650 and no 14500 fits — it takes a curved
+      pouch cell, and both horns carry one. An antenna sitting on top of a cell gets detuned, so
+      the radio moved to the crest keel: centreline, clear of both cells, long enough to radiate.
+      The keel stops being decoration. Runtime is still the weak number — gating the reactor to
+      inhalation only is what turns an afternoon into a working day.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong style="color:var(--mid)">Status:</strong> prototype / work in progress. PulseMask is a
+  design and engineering study by a sole proprietor, <strong style="color:var(--amber)">sold as
+  wearable art</strong>. It is not a certified respirator, not PPE and not a medical device; it is
+  not tested to NIOSH 42 CFR 84, EN 136/143 or ISO 16900; it is not cleared by any regulator; and
+  it provides no respiratory protection whatsoever. UV-C is a serious eye and skin hazard: the
+  reactor here is drawn fully enclosed with no line of sight to the wearer, and no emitters,
+  drivers or batteries are included or supported. Germicidal and capsid-disruption performance is
+  modelled, not measured.</p>
+  <hr>
+  <p class="mono" style="font-size:10.5px">© 2026 Aurelius Dynamic · Rendered with three.js
+  <span id="apiName">WebGPURenderer</span> · TSL node materials, custom vertex attributes for
+  build morph and fit deviation · geometry generated in-browser,
+  no server round trip · <a href="mission.html">mission</a> · <a href="guide.html">guide</a> ·
+  <a href="assembly.html">assembly</a> · <a href="pricing.html">pricing</a> ·
+  no analytics, no cookies, no backend.</p>
+</footer>
+
+<script src="mask-geometry.js"></script>
+<script src="three-d-stage.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import {
+  Fn, vec2, vec3, vec4, float, uniform, attribute, varying, instancedBufferAttribute,
+  positionLocal, positionView, mix, smoothstep, abs, exp, sin, step, clamp,
+  max, min, length, fract, atan, pow, uv, Discard, select, output
+} from 'three/tsl';
+
+const stage = document.getElementById('stage');
+const { api } = await stage.ready;
+
+/* Report the backend that actually came up, not the one we asked for. A
+   machine with no WebGPU adapter silently gets WebGPURenderer's WebGL2
+   backend, and claiming "WebGPU" there would be the rendering equivalent of
+   rounding a metric in our favour. */
+{
+  const el = document.getElementById('apiName');
+  if (el) el.textContent = api === 'webgpu' ? 'WebGPURenderer · WebGPU backend'
+    : api === 'webgl2-fallback' ? 'WebGPURenderer · WebGL2 fallback backend'
+    : 'WebGLRenderer';
+}
+
+/* ------------------------------------------------------------------ state */
+const S = {
+  fw:140, fh:122, rel:4.5, ple:17, wal:2.6, sea:8.4,
+  rl:28, den:6, lp:12, ref:2.6, flo:85, pzt:6,
+  nose:1, chin:1, cheek:1,
+  mode:'assembly', explode:0, flow:true, showFace:false, section:false, radar:true, visorShow:true
+};
+let heightmap = null, photo = null, result = null;
+
+/* --------------------------------------------------------------- shaders */
+/* Track 3: these were GLSL strings spliced into MeshStandardMaterial with
+   onBeforeCompile. Node materials have no onBeforeCompile, so the same effects
+   are expressed as TSL node graphs — which is the point of the port: TSL
+   compiles to WGSL on the WebGPU backend and to GLSL on the WebGL2 fallback,
+   so one description drives both. The maths below is a direct transcription of
+   the shader it replaces; nothing about the look is meant to change. */
+
+/* uniform() nodes replace the old {value} uniform objects. The .value setter
+   is identical, so every caller that wrote U.uBuild.value still works. */
+const U = {
+  uBuild: uniform(1), uScan: uniform(9), uHeat: uniform(0), uTime: uniform(0)
+};
+/* airflow on/off. Was a per-material `uOn` uniform rebuilt with the point
+   system; as a node it outlives the rebuild, so applyView can set it without
+   reaching through flowSys.material. */
+const flowOn = uniform(1);
+
+const NEON = vec3(0.43, 1.00, 0.24);
+
+/* Shared vertex maths, computed once and carried to the fragment stage as
+   varyings — the old shader hand-declared vFit/vForm/vScanD/vY for exactly
+   this. `formed` drives the build morph: below the sweep line a vertex sits at
+   its true position, above it collapses to the flat aBase plate. */
+const aBase   = attribute('aBase', 'vec3');
+const aFit    = attribute('aFit', 'float');
+const scanD   = positionLocal.y.sub(U.uScan);
+const formed  = select(
+  U.uBuild.greaterThanEqual(0.999),
+  float(1),
+  smoothstep(U.uScan.add(0.022), U.uScan.sub(0.014), positionLocal.y)
+);
+const vFit    = varying(aFit,   'vFit');
+const vForm   = varying(formed, 'vForm');
+const vScanD  = varying(scanD,  'vScanD');
+const vY      = varying(positionLocal.y, 'vY');
+
+/* Fit heatmap: −1 means "not a sealing surface" and renders neutral grey;
+   0→1 ramps green → amber → red. */
+const heatColor = Fn(() => {
+  const g = vec3(0.43, 1.00, 0.24);
+  const w = vec3(1.00, 0.76, 0.29);
+  const b = vec3(1.00, 0.36, 0.43);
+  const ramp = mix(g, mix(w, b, smoothstep(0.5, 1.0, vFit)), smoothstep(0.0, 0.55, vFit));
+  return select(vFit.lessThan(0.0), vec3(0.19, 0.20, 0.22), ramp);
+});
+
+function patch(mat){
+  /* positionNode is the node equivalent of writing `transformed` in
+     begin_vertex — it replaces the local position feeding the whole pipeline. */
+  mat.positionNode = mix(aBase, positionLocal, formed);
+
+  /* outputNode runs after lighting, which is where the old code injected
+     (dithering_fragment). Keeping it post-lighting matters: the heatmap is a
+     0.82 mix over the *shaded* colour, so moving it pre-lighting would let
+     shading modulate a readout that is supposed to be flat. */
+  mat.outputNode = Fn(() => {
+    const src = output;
+    let rgb = src.rgb.toVar();
+
+    // fit heatmap
+    rgb.assign(mix(rgb, heatColor(), U.uHeat.mul(0.82)));
+
+    // LIDAR scan band, trail and structured-light contour rings
+    const band  = exp(abs(vScanD).mul(-130.0));
+    const trail = exp(max(vScanD.negate(), 0.0).mul(-26.0)).mul(step(vScanD, 0.0));
+    const rings = smoothstep(0.72, 1.0, abs(sin(vY.mul(300.0).sub(U.uTime.mul(2.2)))));
+    const scanning = U.uBuild.lessThan(0.999).select(float(1), float(0));
+    // unformed geometry drops to 9% brightness; the sweep adds the bright edge
+    rgb.assign(mix(rgb, rgb.mul(mix(0.09, 1.0, vForm))
+      .add(NEON.mul(rings).mul(trail).mul(0.34))
+      .add(NEON.mul(band).mul(2.1)), scanning));
+
+    return vec4(rgb, src.a);
+  })();
+  return mat;
+}
+
+const materials = {};
+function makeMaterials(defs){
+  for (const [name, d] of Object.entries(defs)){
+    const m = new THREE.MeshStandardNodeMaterial({
+      name, color:new THREE.Color(d.color), roughness:d.roughness, metalness:d.metalness,
+      transparent:!!d.transparent, opacity:d.opacity ?? 1,
+      emissive:new THREE.Color(d.emissive || '#000000'),
+      emissiveIntensity:d.emissiveIntensity || 0,
+      side: d.transparent ? THREE.DoubleSide : THREE.FrontSide,
+      depthWrite: !d.transparent
+    });
+    materials[name] = patch(m);
+  }
+}
+makeMaterials(MaskGeometry.MATERIALS);
+
+/* ---------------------------------------------------------- explode table */
+const EX = {
+  visor_lens:[0,.10,1,1], visor_gasket:[0,.06,.9,.7],
+  canister_collar:[0,-.30,.62,.5], pzt_blower_stack:[0,-.42,.86,1.0],
+  uvc_reactor_housing:[0,-.52,1.02,1.5], uv_status_band:[0,-.52,1.02,1.5],
+  uvc_led_array:[0,-.52,1.02,1.5], pzt_capsid_ring:[0,-.58,1.10,1.9],
+  filter_cartridge:[0,-.62,1.18,2.4], pzt_coalescer:[0,-.66,1.24,2.9],
+  intake_grille:[0,-.70,1.30,3.3], controller_band:[0,-.34,.70,.8],
+  status_strip:[0,-.34,.70,.8],
+  exhale_valve:[0,0,0,1.3], valve_diaphragm:[0,0,0,1.0], pzt_harvester:[0,0,0,1.6],
+  oronasal_cup:[0,-.16,.42,.8], seal_lip:[0,0,-.5,.6], pzt_seal_sensor:[0,0,-.7,.9],
+  strap_anchor:[0,0,0,.7], face_form:[0,0,-1,1.5], shell_outer:[0,0,0,0],
+  vent_slats:[0,0,0,0], el_wire:[0,0,0,0], dragon_scales:[0,0,0,0],
+  solar_horn:[0,.30,-.6,.9], pv_array:[0,.30,-.6,1.2], crest_keel:[0,.4,.2,.6],
+  horn_cell:[0,.30,-.6,1.5], crest_antenna:[0,.4,.2,1.0]
+};
+
+/* ------------------------------------------------------------ model build */
+const model = new THREE.Group();
+const meshes = [];
+let flowSys = null, lidar = null, radar = null, framed = false;
+
+function buildModel(){
+  const t0 = performance.now();
+  result = MaskGeometry.build({
+    faceWidth:S.fw/1000, faceHeight:S.fh/1000,
+    relief:S.rel/1000, plenum:S.ple/1000, wall:S.wal/1000, sealR:S.sea/2000,
+    reactorLen:S.rl/1000, ledCount:Math.max(4, Math.round(S.den * S.rl / 10)),
+    ledPower:S.lp, reflectance:S.ref,
+    flowLpm:S.flo, pztSensors:S.pzt,
+    noseScale:S.nose, chinScale:S.chin, cheekScale:S.cheek,
+    heightmap
+  });
+
+  for (const m of meshes){ m.geometry.dispose(); model.remove(m); }
+  meshes.length = 0;
+
+  const faceZ = result.faceZ;
+  const beadParts = new Set(['seal_lip','pzt_seal_sensor']);
+  let worstDev = 0;
+
+  for (const part of result.parts){
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(part.positions, 3));
+    g.setAttribute('normal',   new THREE.BufferAttribute(part.normals, 3));
+    g.setIndex(new THREE.BufferAttribute(part.indices, 1));
+
+    const n = part.positions.length / 3;
+    const base = new Float32Array(part.positions.length);
+    const fit  = new Float32Array(n);
+    const isBead = beadParts.has(part.name);
+    const isCup  = part.name === 'oronasal_cup';
+    for (let i = 0; i < n; i++){
+      const x = part.positions[i*3], y = part.positions[i*3+1], z = part.positions[i*3+2];
+      base[i*3] = x * 0.97; base[i*3+1] = y; base[i*3+2] = -0.026;
+      fit[i] = -1;
+      if (isBead){
+        /* only the underside of the bead is a contact surface */
+        const pen = faceZ(x, y) - z;
+        if (pen > -0.0012 && pen < 0.0032) fit[i] = Math.min(1, Math.abs(pen - 0.0008) / 0.0012);
+      } else if (isCup){
+        const gap = z - faceZ(x, y);
+        if (gap < 0.0026){
+          const dev = Math.abs(gap - 0.0009);
+          fit[i] = Math.min(1, dev / 0.0014);
+          if (dev > worstDev) worstDev = dev;
+        }
+      }
+    }
+    g.setAttribute('aBase', new THREE.BufferAttribute(base, 3));
+    g.setAttribute('aFit',  new THREE.BufferAttribute(fit, 1));
+
+    const mesh = new THREE.Mesh(g, materials[part.material] || materials.shell_polymer);
+    mesh.name = part.name;
+    /* setObject only runs on the first build — rebuilt meshes must re-enable
+       shadows themselves or the ground contact shadow dies on first change */
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    mesh.userData.ex = EX[part.name] || [0,0,0,.5];
+    model.add(mesh); meshes.push(mesh);
+  }
+
+  buildFlow(result.airPath);
+  buildLidar(result.parts);
+  buildRadar();
+  applyView();
+  updateMetrics(result.metrics, worstDev * 1000, performance.now() - t0);
+  if (!framed){ stage.setObject(model); framed = true; }
+}
+
+/* ------------------------------------------------- instanced point sprites */
+/* Why this is a Sprite and not THREE.Points.
+   three's own docs are explicit: with a WebGPU backend, THREE.Points renders
+   native point primitives, which are capped at 1 pixel and ignore sizeNode
+   entirely. The supported way to get sized, textured points is a Sprite whose
+   positionNode is an instancedBufferAttribute — the renderer then draws one
+   camera-facing quad per instance, honours sizeNode, and gives the fragment
+   stage a real uv() across the quad.
+
+   That uv() is also why pointUV is gone: pointUV compiles to gl_PointCoord,
+   which exists in GLSL and does NOT exist in WGSL, so it hard-fails on a real
+   WebGPU adapter while passing silently on the WebGL2 fallback.
+
+   instanceCount comes from `sprite.count` (renderer: `object.count !== undefined`).
+   frustumCulled must stay off — a Sprite is frustum-tested as a single point at
+   its origin, which is meaningless for a cloud spread across the model. */
+function makePointSprites(count, attrs, build){
+  const mat = new THREE.PointsNodeMaterial({
+    transparent:true, depthWrite:false, blending:THREE.AdditiveBlending
+  });
+  const A = {};
+  for (const [name, spec] of Object.entries(attrs)){
+    const [data, size] = name === 'position' ? [spec, 3] : spec;
+    const ba = new THREE.InstancedBufferAttribute(new Float32Array(data), size);
+    A[name] = instancedBufferAttribute(ba);
+    if (name === 'position') mat.positionNode = A.position;
+  }
+  // A.position is handed to the builder too: on a sprite, positionLocal is the
+  // ±0.5 quad corner, so anything that needs where the *point* sits in the
+  // model — the LIDAR sweep test, for one — must read this instead.
+  const out = build(A);
+  /* sizeAttenuation:false because the size expression below already divides by
+     view-space depth — leaving it on would apply perspective attenuation twice.
+     With it off, sizeNode is in pixels, matching gl_PointSize's semantics. */
+  mat.sizeAttenuation = false;
+  mat.sizeNode = out.size;
+  mat.colorNode = out.color;
+
+  const sprite = new THREE.Sprite(mat);
+  sprite.count = count;
+  sprite.frustumCulled = false;
+  return sprite;
+}
+
+/* Sprites share one module-level quad geometry inside three, so disposing
+   `sprite.geometry` would tear it out from under every other sprite. Only the
+   material is ours to dispose. */
+function disposeSprite(s){
+  if (!s) return;
+  model.remove(s);
+  if (s.material) s.material.dispose();
+}
+
+/* ----------------------------------------------------------- airflow GPU */
+function sampleCurve(pts, n){
+  const cur = new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(p[0],p[1],p[2])));
+  return cur.getSpacedPoints(n);
+}
+function buildFlow(air){
+  if (flowSys){ disposeSprite(flowSys); flowSys = null; }
+  if (!air) return;
+  const lanes = [ {pts:air.intake, tint:0}, ...air.exhale.map(p=>({pts:p, tint:1})) ];
+  const per = 220, pos = [], tt = [], tint = [], lane = [];
+  lanes.forEach((L, li)=>{
+    const sp = sampleCurve(L.pts, per);
+    for (let i = 0; i < per; i++){
+      const jitter = 0.0055;
+      pos.push(sp[i].x + (Math.random()-.5)*jitter,
+               sp[i].y + (Math.random()-.5)*jitter,
+               sp[i].z + (Math.random()-.5)*jitter);
+      tt.push(i / per); tint.push(L.tint); lane.push(li + Math.random());
+    }
+  });
+  flowSys = makePointSprites(pos.length / 3, {
+    position: pos, aT: [tt, 1], aTint: [tint, 1], aLane: [lane, 1]
+  }, (A) => {
+    const head = fract(U.uTime.mul(0.34).add(A.aLane.mul(0.13)));
+    const d = fract(A.aT.sub(head).add(1.0));
+    const vA = varying(smoothstep(0.16, 0.0, d).mul(smoothstep(0.0, 0.02, d)), 'vA');
+    const vTint = varying(A.aTint, 'vTint');
+    return {
+      // metres-scale point size — see VSCODE.md §4. A unit-scale formula here
+      // produces ~1000 px points that saturate the frame to white.
+      size: float(0.0016).add(vA.mul(0.0026)).mul(1400.0).div(positionView.z.negate()),
+      color: Fn(() => {
+        const c = uv().sub(0.5);
+        const r = float(1).sub(smoothstep(0.16, 0.5, length(c)));
+        const col = mix(vec3(0.45,1.00,0.26), vec3(1.00,0.76,0.29), vTint);
+        const a = r.mul(vA).mul(flowOn);
+        Discard(a.lessThan(0.01));
+        return vec4(col, a);
+      })()
+    };
+  });
+  flowSys.name = '_airflow';
+  flowSys.userData.noExport = true;
+  model.add(flowSys);
+}
+
+/* ------------------------------------------------------ LIDAR acquisition */
+function buildLidar(parts){
+  if (lidar){ disposeSprite(lidar); lidar = null; }
+  let total = 0;
+  for (const p of parts) if (p.name !== 'face_form') total += p.positions.length / 3;
+  const stride = Math.max(1, Math.round(total / 15000));
+  const pos = [], rnd = [];
+  let k = 0;
+  for (const p of parts){
+    if (p.name === 'face_form') continue;
+    const n = p.positions.length / 3;
+    for (let i = 0; i < n; i++, k++){
+      if (k % stride) continue;
+      pos.push(p.positions[i*3], p.positions[i*3+1], p.positions[i*3+2]);
+      rnd.push(Math.random());
+    }
+  }
+  lidar = makePointSprites(pos.length / 3, {
+    position: pos, aRand: [rnd, 1]
+  }, (A) => {
+    /* The sweep is read from the instance's own position, so this has to be
+       the instanced attribute rather than positionLocal — positionLocal on a
+       sprite is the ±0.5 quad corner, not where the point sits in the model. */
+    const dY    = A.position.y.sub(U.uScan);
+    const hit   = exp(abs(dY).mul(-85.0));
+    const done  = smoothstep(0.005, -0.005, dY);
+    const live  = float(1).sub(smoothstep(0.80, 1.0, U.uBuild));
+    const flick = float(0.72).add(sin(U.uTime.mul(9.0).add(A.aRand.mul(40.0))).mul(0.28));
+    const vHit  = varying(hit, 'vHit');
+    const vI    = varying(clamp(hit.mul(1.7).add(done.mul(0.26).mul(flick)), 0.0, 2.0).mul(live), 'vI');
+    return {
+      size: float(0.0009).add(hit.mul(0.0026)).mul(1400.0).div(positionView.z.negate()),
+      color: Fn(() => {
+        Discard(vI.lessThan(0.012));
+        const c = uv().sub(0.5);
+        const r = float(1).sub(smoothstep(0.10, 0.5, length(c)));
+        const col = mix(vec3(0.32,0.92,0.30), vec3(0.86,1.0,0.72), vHit);
+        return vec4(col, r.mul(vI));
+      })()
+    };
+  });
+  lidar.name = '_lidar';
+  lidar.userData.noExport = true;
+  model.add(lidar);
+}
+
+/* --------------------------------------------------------- radar ground */
+/* bounds of the hardware meshes only — the persistent radar disc must never
+   feed its own extent back into its scale on rebuilds */
+function partsBox(){
+  const box = new THREE.Box3();
+  for (const m of meshes) box.expandByObject(m);
+  return box;
+}
+function buildRadar(){
+  const box = partsBox();
+  const R = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) * 1.55;
+  if (!radar){
+    const g = new THREE.CircleGeometry(1, 96);
+    /* positionLocal is object space — before the model matrix — so the
+       runtime radar.scale.setScalar(R) does not reach it and r stays in 0..1
+       against the unit CircleGeometry. Same value the old GLSL read as
+       `position.xy`. */
+    const vP = varying(positionLocal.xy, 'vP');
+    const mat = new THREE.MeshBasicNodeMaterial({
+      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+      side:THREE.DoubleSide
+    });
+    mat.colorNode = Fn(() => {
+      const r = length(vP);
+      Discard(r.greaterThan(1.0));
+      const ang = atan(vP.y, vP.x);
+      const sweep = fract(ang.add(U.uTime.mul(0.85)).div(6.28318));
+      const wedge = pow(float(1).sub(sweep), 11.0);
+      const rings = smoothstep(0.88, 1.0, abs(sin(r.mul(34.0))));
+      const spokes = smoothstep(0.985, 1.0, abs(sin(ang.mul(6.0))));
+      const edge = smoothstep(1.0, 0.90, r).mul(smoothstep(0.0, 0.10, r));
+      const boost = float(1).add(float(1).sub(smoothstep(0.8, 1.0, U.uBuild)).mul(1.8));
+      const a = wedge.mul(0.20).add(rings.mul(0.055)).add(spokes.mul(0.035)).mul(edge).mul(boost);
+      Discard(a.lessThan(0.004));
+      return vec4(vec3(0.36, 1.0, 0.26), a);
+    })();
+    radar = new THREE.Mesh(g, mat);
+    radar.name = '_radar';
+    radar.rotation.x = -Math.PI / 2;
+    radar.frustumCulled = false;
+    radar.userData.noExport = true;
+    model.add(radar);
+  }
+  radar.scale.setScalar(R);
+  radar.position.y = box.min.y - 0.002;
+}
+
+/* ----------------------------------------------------------------- views */
+const clipPlane = new THREE.Plane(new THREE.Vector3(-1,0,0), 0);
+function applyView(){
+  U.uHeat.value = S.mode === 'fit' ? 1 : 0;
+  const r = stage.renderer;
+  /* WebGPURenderer has no localClippingEnabled gate — material.clippingPlanes
+     is honoured directly. Set it only where the property exists so the classic
+     renderer keeps working from this same code. */
+  if (r && 'localClippingEnabled' in r) r.localClippingEnabled = S.section;
+  for (const m of Object.values(materials)) m.clippingPlanes = S.section ? [clipPlane] : null;
+  for (const m of meshes){
+    if (m.name === 'face_form') m.visible = S.showFace;
+    else if (m.name === 'visor_lens' || m.name === 'visor_gasket') m.visible = S.visorShow;
+    else m.visible = true;
+  }
+  flowOn.value = S.flow ? 1 : 0;
+  if (radar) radar.visible = S.radar;
+}
+let exNow = 0;
+function tickExplode(dt){
+  exNow += (S.explode - exNow) * Math.min(1, dt * 6);
+  for (const m of meshes){
+    const e = m.userData.ex, k = exNow * 0.055 * e[3];
+    const sign = m.name === 'exhale_valve' || m.name === 'valve_diaphragm' || m.name === 'pzt_harvester'
+      || m.name === 'strap_anchor' ? 0 : 1;
+    m.position.set(e[0] * k, e[1] * k, e[2] * k);
+    if (!sign) m.position.set(0, 0, k * 0.6);
+  }
+}
+
+/* ----------------------------------------------------------- build reveal */
+let reveal = null;
+function playReveal(){
+  const box = partsBox();
+  reveal = { t:0, y0:box.min.y - 0.02, y1:box.max.y + 0.03 };
+}
+stage.renderer && null;
+let last = performance.now();
+(function loop(now){
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  U.uTime.value = now / 1000;
+  tickExplode(dt);
+  if (reveal){
+    reveal.t += dt / 2.6;
+    if (reveal.t >= 1){ U.uBuild.value = 1; U.uScan.value = 9; reveal = null; }
+    else {
+      U.uBuild.value = reveal.t;
+      const e = reveal.t < .5 ? 2*reveal.t*reveal.t : 1-Math.pow(-2*reveal.t+2,2)/2;
+      U.uScan.value = reveal.y0 + (reveal.y1 - reveal.y0) * e;
+    }
+  }
+})(performance.now());
+
+/* --------------------------------------------------------------- metrics */
+const MCARDS = [
+  { k:'UV-C dose', get:(m)=>({ v:m.uvDose.toFixed(2), u:'mJ/cm²',
+      note:`target ≥ 3.0 for 2-log · ${(m.uvDose/3*100).toFixed(0)}% of target`,
+      bar:Math.min(1, m.uvDose/3), cls: m.uvDose>=3 ? 'ok' : m.uvDose>=1 ? 'warn' : 'flag' }) },
+  { k:'Log reduction', get:(m)=>({ v:m.lrv.toFixed(2), u:'LRV',
+      note:`${(100*(1-Math.exp(-m.uvDose*1.2))).toFixed(1)}% single-pass inactivation`,
+      cls: m.lrv>=2 ? 'ok' : m.lrv>=1 ? 'warn' : 'flag' }) },
+  { k:'Reactor dwell', get:(m)=>({ v:m.dwellMS.toFixed(1), u:'ms',
+      note:`${m.ledTotal} LEDs · ${m.irradiance.toFixed(1)} mW/cm² mean wall irradiance` }) },
+  { k:'Dead space', get:(m)=>({ v:m.deadSpaceML.toFixed(0), u:'mL',
+      note:'nose-conforming cup · target < 200 mL',
+      bar:Math.min(1, m.deadSpaceML/200), cls: m.deadSpaceML<200 ? 'ok' : 'flag' }) },
+  { k:'Bead compression', get:(m,dev)=>({ v:m.beadCompMM.toFixed(2), u:'mm',
+      note:`design interference · cup clearance error ${dev.toFixed(2)} mm`,
+      cls: m.beadCompMM>=0.5 && m.beadCompMM<=1.4 ? 'ok' : 'warn' }) },
+  { k:'Printed shell', get:(m)=>({ v:m.shellMassG.toFixed(0), u:'g',
+      note:`${m.shellVolumeCM3.toFixed(1)} cm³ PA12 · rim ${m.rimLengthMM.toFixed(0)} mm` }) },
+  { k:'Solar array', get:(m)=>({ v:m.pvWatts.toFixed(2), u:'W peak',
+      note:`${m.pvAreaCM2.toFixed(1)} cm² on the horns · ${(m.pvWatts/m.loadW*100).toFixed(0)}% of the ${m.loadW.toFixed(1)} W load`,
+      bar:Math.min(1, m.pvWatts/m.loadW),
+      cls: m.pvWatts>=m.loadW ? 'ok' : 'warn' }) },
+  { k:'Runtime', get:(m)=>({ v:m.runtimeH.toFixed(1), u:'h',
+      note:`${m.batteryWh.toFixed(1)} Wh in the horns · ${m.runtimeSolarH.toFixed(1)} h with sun · ${m.runtimeDutyH.toFixed(1)} h inhale-gated`,
+      bar:Math.min(1, m.runtimeH/8),
+      cls: m.runtimeH>=8 ? 'ok' : m.runtimeH>=4 ? 'warn' : 'flag' }) },
+  { k:'PZT channels', get:(m)=>({ v:m.pztTotal, u:'',
+      note:'seal sensing · coalescer · capsid · blower · harvest' }) },
+  { k:'Mesh', get:(m,d,ms)=>({ v:(m.triangles/1000).toFixed(1), u:'k tris',
+      note:`generated in ${ms.toFixed(0)} ms` }) }
+];
+const mEl = document.getElementById('metrics');
+mEl.innerHTML = MCARDS.map(c=>`<div class="m"><div class="k">${c.k}</div>
+  <div class="v"><em style="font-style:normal">–</em><span></span></div>
+  <div class="n"></div></div>`).join('');
+function updateMetrics(m, dev, ms){
+  MCARDS.forEach((c, i)=>{
+    const r = c.get(m, dev, ms), el = mEl.children[i];
+    el.className = 'm ' + (r.cls || '');
+    el.querySelector('.v').innerHTML = `${r.v}<span>${r.u}</span>` +
+      (r.bar !== undefined ? `<div class="bar"><i style="width:${(r.bar*100).toFixed(0)}%"></i></div>` : '');
+    el.querySelector('.n').textContent = r.note || '';
+  });
+  document.getElementById('stat').textContent =
+    `${(m.triangles/1000).toFixed(1)}k tris · ${m.faceWidthMM.toFixed(0)}×${m.faceHeightMM.toFixed(0)} mm · ${ms.toFixed(0)} ms`;
+}
+
+/* ------------------------------------------------------------ view chips */
+const VIEWS = [
+  { id:'assembly', label:'Assembly' },
+  { id:'fit',      label:'Fit heatmap' },
+  { id:'explode',  label:'Exploded' },
+  { id:'section',  label:'Section' },
+  { id:'face',     label:'Face form' },
+  { id:'visor',    label:'Visor' },
+  { id:'flow',     label:'Airflow' },
+  { id:'radar',    label:'Radar' },
+  { id:'replay',   label:'◎ LIDAR scan' }
+];
+const chipsEl = document.getElementById('viewChips');
+chipsEl.innerHTML = VIEWS.map(v=>`<button class="chip" type="button" data-v="${v.id}">${v.label}</button>`).join('');
+function syncChips(){
+  chipsEl.querySelectorAll('.chip').forEach(b=>{
+    const v = b.dataset.v;
+    /* replay is a momentary action, not a toggle — no pressed state */
+    if (v === 'replay'){ b.removeAttribute('aria-pressed'); return; }
+    const on = v === 'assembly' ? (S.mode === 'assembly' && !S.explode && !S.section)
+      : v === 'fit' ? S.mode === 'fit'
+      : v === 'explode' ? S.explode > 0
+      : v === 'section' ? S.section
+      : v === 'face' ? S.showFace
+      : v === 'visor' ? S.visorShow
+      : v === 'flow' ? S.flow
+      : v === 'radar' ? S.radar : false;
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+chipsEl.addEventListener('click', e=>{
+  const b = e.target.closest('.chip'); if (!b) return;
+  const v = b.dataset.v;
+  if (v === 'assembly'){ S.mode='assembly'; S.explode=0; S.section=false; }
+  else if (v === 'fit') S.mode = S.mode === 'fit' ? 'assembly' : 'fit';
+  else if (v === 'explode') S.explode = S.explode > 0 ? 0 : 1;
+  else if (v === 'section') S.section = !S.section;
+  else if (v === 'face') S.showFace = !S.showFace;
+  else if (v === 'visor') S.visorShow = !S.visorShow;
+  else if (v === 'flow') S.flow = !S.flow;
+  else if (v === 'radar') S.radar = !S.radar;
+  else if (v === 'replay') playReveal();
+  applyView(); syncChips();
+});
+
+/* ------------------------------------------------------ operation stages */
+const STAGES = [
+  ['Intake', 'Ambient air enters the chin canister through the domed grille. The grille is the only unfiltered opening on the mask.', ()=>({explode:1, flow:true})],
+  ['PZT coalescer', 'An annular transducer at the intake drives sub-micron aerosol into collisions, growing particles into a size the filter media actually captures.', ()=>({explode:1, flow:true})],
+  ['Filter', 'Pleated media takes the particulate load. Everything downstream sees a far lower bioburden, which is what makes a modest UV dose worth having.', ()=>({explode:1, flow:true})],
+  ['UV-C reactor', 'A fully enclosed, internally reflective chamber. Two LED rings, no line of sight to the wearer. The violet band on the outside is a status indicator, not a window.', ()=>({explode:1, flow:true})],
+  ['PZT capsid ring', 'Acoustic energy coupled into the airstream mid-reactor. Theoretical: intended to stress capsids so a sub-lethal UV dose finishes the job. Unvalidated.', ()=>({explode:1, flow:true})],
+  ['Piezo blower', 'A piezo disc stack assists flow so dwell time is set by the device, not by how hard the wearer breathes.', ()=>({explode:1, flow:true})],
+  ['Oronasal cup', 'Treated air lands in the inner cup over nose and mouth — small volume, low dead space, visor stays clear.', ()=>({explode:0, flow:true, section:true})],
+  ['Exhale + harvest', 'Cheek valves vent exhaled air. A piezo bender in each valve harvests the breath pulse and trickle-charges the pack.', ()=>({explode:0, flow:true, section:false})]
+];
+document.getElementById('steps').innerHTML = STAGES.map((s,i)=>`
+  <div class="step">
+    <div class="num">${String(i+1).padStart(2,'0')}</div>
+    <div><h3>${s[0]}</h3><p style="margin:0 0 6px">${s[1]}</p>
+    <button class="chip" type="button" data-stage="${i}">Show on model</button></div>
+  </div>`).join('');
+document.getElementById('steps').addEventListener('click', e=>{
+  const b = e.target.closest('[data-stage]'); if (!b) return;
+  Object.assign(S, STAGES[+b.dataset.stage][2]());
+  applyView(); syncChips();
+});
+
+/* -------------------------------------------------------------- roadmap */
+const RM = [
+  ['Phase 0','Concept + geometry','Parametric shell, inner cup, canister architecture, in-browser generator and STL export.','done'],
+  ['Phase 1','Fit validation','Depth-scan capture to replace single-image inference. Printed shells against a landmark panel, pressure mapping from the PZT seal array.','now'],
+  ['Phase 2','Dose budget','Folded labyrinth reactor and blower-decoupled flow to close the gap between 0.2 and 3 mJ/cm². Bench assay with surrogate phage.','now'],
+  ['Phase 3','PZT validation','Isolate coalescence gain and test the capsid-disruption hypothesis properly. Drop it if it does not hold.','next'],
+  ['Phase 4','Safety + interlocks','UV-C leakage survey, thermal, CO₂ washout to ISO 16900-style protocol, battery abuse.','next'],
+  ['Phase 5','WebGPU / TSL renderer','Generator and Shader Lab both run WebGPURenderer with TSL node materials; all 34 designs ported from GLSL. Visual parity held, STL/OBJ/GLB exports unaffected, and WebGPU’s own WebGL2 backend covers machines with no adapter.','done'],
+  ['Phase 6','Regulatory path','Classification review and a pre-submission — only if Phases 2 and 3 produce evidence worth submitting. Until that day the product stays exactly what it says it is: art.','next']
+];
+document.getElementById('rm').innerHTML = RM.map(r=>`<div>
+  <div class="mono" style="font-size:11px; color:var(--hz)">${r[0]}</div>
+  <div style="font-weight:600; font-size:13.5px">${r[1]}</div>
+  <div style="color:var(--mid); font-size:12.5px">${r[2]}</div>
+  <div class="pill ${r[3]==='done'?'done':r[3]==='now'?'now':''}">${r[3]==='done'?'complete':r[3]==='now'?'in progress':'planned'}</div>
+</div>`).join('');
+
+/* --------------------------------------------------------------- photo */
+const LM = [
+  { id:'pupilL', label:'L pupil', x:.37, y:.40 },
+  { id:'pupilR', label:'R pupil', x:.63, y:.40 },
+  { id:'nose',   label:'nose tip', x:.50, y:.565 },
+  { id:'mouth',  label:'mouth',    x:.50, y:.672 },
+  { id:'chin',   label:'menton',   x:.50, y:.835 }
+];
+const lmWrap = document.getElementById('lmWrap');
+const lmC = document.getElementById('lmCanvas'), lmX = lmC.getContext('2d');
+const hmC = document.getElementById('hmCanvas'), hmX = hmC.getContext('2d');
+const drop = document.getElementById('drop');
+const fileIn = document.getElementById('file');
+
+drop.addEventListener('click', ()=>fileIn.click());
+drop.addEventListener('keydown', e=>{
+  if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fileIn.click(); }
+});
+drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('on'); });
+drop.addEventListener('dragleave', ()=>drop.classList.remove('on'));
+drop.addEventListener('drop', e=>{
+  e.preventDefault(); drop.classList.remove('on');
+  if (e.dataTransfer.files[0]) loadPhoto(e.dataTransfer.files[0]);
+});
+fileIn.addEventListener('change', ()=>{ if (fileIn.files[0]) loadPhoto(fileIn.files[0]); });
+
+function loadPhoto(f){
+  const img = new Image();
+  img.onload = ()=>{
+    const W = 460, H = Math.round(img.height / img.width * W);
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    c.getContext('2d').drawImage(img, 0, 0, W, H);
+    photo = c;
+    lmC.width = W; lmC.height = H;
+    lmWrap.style.display = 'block';
+    drop.textContent = f.name + ' · drag the markers onto the landmarks';
+    drawLM(); recompute();
+  };
+  img.src = URL.createObjectURL(f);
+}
+
+let dragI = -1;
+function lmPx(l){ return [l.x * lmC.width, l.y * lmC.height]; }
+function drawLM(){
+  if (!photo) return;
+  lmX.drawImage(photo, 0, 0);
+  lmX.strokeStyle = 'rgba(168,146,239,.55)'; lmX.lineWidth = 1;
+  lmX.beginPath();
+  const [ax,ay] = lmPx(LM[0]), [bx,by] = lmPx(LM[1]);
+  lmX.moveTo(ax,ay); lmX.lineTo(bx,by);
+  const [mx,my] = [(ax+bx)/2,(ay+by)/2], [cx,cy] = lmPx(LM[4]);
+  lmX.moveTo(mx,my); lmX.lineTo(cx,cy); lmX.stroke();
+  LM.forEach((l,i)=>{
+    const [x,y] = lmPx(l);
+    lmX.beginPath(); lmX.arc(x,y,7,0,Math.PI*2);
+    lmX.fillStyle = i===dragI ? 'rgba(168,146,239,.95)' : 'rgba(12,14,17,.72)';
+    lmX.fill();
+    lmX.strokeStyle = '#a892ef'; lmX.lineWidth = 1.6; lmX.stroke();
+    lmX.beginPath(); lmX.arc(x,y,1.6,0,Math.PI*2); lmX.fillStyle = '#fff'; lmX.fill();
+    lmX.font = '500 10px "IBM Plex Mono", monospace'; lmX.fillStyle = 'rgba(233,231,226,.85)';
+    lmX.fillText(l.label, x + 11, y + 3.5);
+  });
+}
+function evXY(e){
+  const r = lmC.getBoundingClientRect();
+  const p = e.touches ? e.touches[0] : e;
+  return [(p.clientX - r.left) / r.width * lmC.width, (p.clientY - r.top) / r.height * lmC.height];
+}
+function down(e){
+  const [x,y] = evXY(e);
+  let best = -1, bd = 26;
+  LM.forEach((l,i)=>{ const [lx,ly] = lmPx(l); const d = Math.hypot(lx-x, ly-y); if (d < bd){ bd = d; best = i; } });
+  if (best >= 0){ dragI = best; e.preventDefault(); drawLM(); }
+}
+function move(e){
+  if (dragI < 0) return;
+  const [x,y] = evXY(e);
+  LM[dragI].x = Math.max(0, Math.min(1, x / lmC.width));
+  LM[dragI].y = Math.max(0, Math.min(1, y / lmC.height));
+  drawLM(); e.preventDefault();
+}
+function up(){ if (dragI >= 0){ dragI = -1; drawLM(); recompute(); } }
+lmC.addEventListener('pointerdown', down);
+window.addEventListener('pointermove', move);
+window.addEventListener('pointerup', up);
+window.addEventListener('pointercancel', up);   // touch scroll-takeover ends drags too
+
+/* photo → canonical relief map (high-pass luminance, lighting removed) */
+const HM_W = 88, HM_H = 110, HM = { x0:-0.075, x1:0.075, y0:-0.098, y1:0.106 };
+function recompute(){
+  if (!photo){ heightmap = null; rebuild(); return; }
+  const [ax,ay] = lmPx(LM[0]), [bx,by] = lmPx(LM[1]);
+  const ipdPx = Math.hypot(bx-ax, by-ay) || 1;
+  const exMid = [(ax+bx)/2, (ay+by)/2];
+  const ang = Math.atan2(by-ay, bx-ax);
+  const ipdMM = +document.getElementById('ipd').value || 63;
+  const mmPerPx = ipdMM / ipdPx;
+
+  const [cx,cy] = lmPx(LM[4]);
+  const chinMM = Math.hypot(cx-exMid[0], cy-exMid[1]) * mmPerPx;
+  const [nx,ny] = lmPx(LM[2]);
+  const noseMM = Math.hypot(nx-exMid[0], ny-exMid[1]) * mmPerPx;
+
+  S.fw = Math.round(Math.max(118, Math.min(168, ipdMM * 2.22)));
+  S.fh = Math.round(Math.max(100, Math.min(146, 122 * (chinMM / 129))));
+  S.nose = Math.max(.7, Math.min(1.35, 1 + 1.1 * ((noseMM / (chinMM || 1)) - 0.411) / 0.411));
+  S.chin = Math.max(.7, Math.min(1.35, 1 + 0.8 * ((chinMM / 129) - 1)));
+  syncSlider('fw', S.fw); syncSlider('fh', S.fh);
+
+  /* canonical metres → image px */
+  const mPerPx = (ipdMM / 1000) / ipdPx * (140 / S.fw);
+  const eyeLineY = 0.057;
+  const ca = Math.cos(ang), sa = Math.sin(ang);
+  const src = photo.getContext('2d').getImageData(0, 0, photo.width, photo.height).data;
+  const lum = new Float32Array(HM_W * HM_H);
+  for (let j = 0; j < HM_H; j++){
+    const fy = HM.y1 + (HM.y0 - HM.y1) * (j / (HM_H - 1));
+    for (let i = 0; i < HM_W; i++){
+      const fx = HM.x0 + (HM.x1 - HM.x0) * (i / (HM_W - 1));
+      const u = fx / mPerPx, v = -(fy - eyeLineY) / mPerPx;
+      const px = Math.round(exMid[0] + u * ca - v * sa);
+      const py = Math.round(exMid[1] + u * sa + v * ca);
+      let L = 0;
+      if (px >= 0 && px < photo.width && py >= 0 && py < photo.height){
+        const o = (py * photo.width + px) * 4;
+        L = (0.2126*src[o] + 0.7152*src[o+1] + 0.0722*src[o+2]) / 255;
+      }
+      lum[j*HM_W+i] = L;
+    }
+  }
+  /* separable box blur → high-pass removes the lighting gradient */
+  const R = 9, tmp = new Float32Array(lum.length), blur = new Float32Array(lum.length);
+  for (let j = 0; j < HM_H; j++) for (let i = 0; i < HM_W; i++){
+    let s = 0, n = 0;
+    for (let k = -R; k <= R; k++){ const x = i+k; if (x>=0 && x<HM_W){ s += lum[j*HM_W+x]; n++; } }
+    tmp[j*HM_W+i] = s/n;
+  }
+  for (let j = 0; j < HM_H; j++) for (let i = 0; i < HM_W; i++){
+    let s = 0, n = 0;
+    for (let k = -R; k <= R; k++){ const y = j+k; if (y>=0 && y<HM_H){ s += tmp[y*HM_W+i]; n++; } }
+    blur[j*HM_W+i] = s/n;
+  }
+  const det = new Float32Array(lum.length);
+  let mx2 = 1e-5;
+  for (let i = 0; i < det.length; i++){ det[i] = lum[i] - blur[i]; mx2 = Math.max(mx2, Math.abs(det[i])); }
+  for (let i = 0; i < det.length; i++) det[i] /= mx2;
+
+  heightmap = { w:HM_W, h:HM_H, data:det, x0:HM.x0, x1:HM.x1, y0:HM.y0, y1:HM.y1 };
+
+  const id = hmX.createImageData(HM_W, HM_H);
+  for (let i = 0; i < det.length; i++){
+    const t = (det[i] + 1) / 2;
+    id.data[i*4]   = 40 + t * 190;
+    id.data[i*4+1] = 34 + t * 176;
+    id.data[i*4+2] = 58 + t * 190;
+    id.data[i*4+3] = 255;
+  }
+  hmC.width = HM_W; hmC.height = HM_H;
+  hmX.putImageData(id, 0, 0);
+  rebuild();
+}
+
+/* -------------------------------------------------------------- sliders */
+const SL = [['fw',0],['fh',0],['rel',1],['ple',1],['wal',1],['sea',1],
+            ['rl',0],['den',0],['lp',0],['ref',1],['flo',0],['pzt',0]];
+function syncSlider(id, val){
+  const el = document.getElementById('s_'+id); if (!el) return;
+  el.value = val;
+  document.getElementById('v_'+id).textContent = val;
+}
+for (const [id, dec] of SL){
+  const el = document.getElementById('s_'+id);
+  el.addEventListener('input', ()=>{
+    S[id] = +el.value;
+    document.getElementById('v_'+id).textContent = dec ? (+el.value).toFixed(1) : el.value;
+    rebuild();
+  });
+}
+document.getElementById('ipd').addEventListener('input', recompute);
+
+let pending = 0;
+function rebuild(){
+  cancelAnimationFrame(pending);
+  pending = requestAnimationFrame(()=>{ buildModel(); syncChips(); });
+}
+
+/* --------------------------------------------------------------- export */
+/* Purchase gate. Honest scope: this is a storefront gate, not DRM — geometry
+   is generated client-side, so a technical user can always extract it. The
+   code format is checked, not verified (no backend, by design); codes are
+   issued in the order-delivery email. Real enforcement = server-side
+   generation, which is a deliberate architecture decision, not a patch. */
+const UNLOCK_KEY = 'pulsemask.unlock';
+const unlockOk = (c)=>/^PMK-[A-Z0-9]{4,}$/i.test(c || '');
+function exportsUnlocked(){
+  try { return unlockOk(localStorage.getItem(UNLOCK_KEY)); } catch(e){ return false; }
+}
+function syncExportGate(){
+  const on = exportsUnlocked();
+  for (const id of ['dlStl','dlObj','dlGlb']) document.getElementById(id).disabled = !on;
+  document.getElementById('unlockState').textContent = on
+    ? '✓ exports unlocked on this browser'
+    : 'exports locked — purchase a tier, or enter your order code';
+}
+document.getElementById('unlockApply').addEventListener('click', ()=>{
+  const c = document.getElementById('unlockCode').value.trim();
+  if (!unlockOk(c)){
+    document.getElementById('unlockState').textContent =
+      'that does not look like an order code (PMK-…) — check your delivery email';
+    return;
+  }
+  try { localStorage.setItem(UNLOCK_KEY, c.toUpperCase()); } catch(e){}
+  syncExportGate();
+});
+syncExportGate();
+document.getElementById('dlStl').addEventListener('click', ()=>stage._runExport('stl'));
+document.getElementById('dlObj').addEventListener('click', ()=>stage._runExport('obj'));
+document.getElementById('dlGlb').addEventListener('click', ()=>stage._runExport('glb'));
+
+/* ---------------------------------------------------------------- theme */
+const THEME_KEY = 'pulsemask.theme';
+const STAGE_BG = { dark:'#0A0F10', light:'#E9EEE7' };
+function setTheme(t){
+  document.documentElement.dataset.theme = t;
+  document.getElementById('themeBtn').textContent = t === 'dark' ? '◐ Light' : '◑ Dark';
+  stage.style.setProperty('--stage-bg', STAGE_BG[t]);
+  if (stage.scene) stage.scene.background = new THREE.Color(STAGE_BG[t]);
+  try { localStorage.setItem(THEME_KEY, t); } catch(e){}
+}
+document.getElementById('themeBtn').addEventListener('click', ()=>{
+  setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+});
+let saved = 'dark';
+try { saved = localStorage.getItem(THEME_KEY) || 'dark'; } catch(e){}
+setTheme(saved);
+
+/* ----------------------------------------------------------------- boot */
+buildModel();
+syncChips();
+playReveal();
+</script>
+</body>
+</html>

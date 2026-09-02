@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Print &amp; fit guide — PulseMask · Aurelius Dynamic</title>
+<meta name="description" content="How to shoot the portrait, print the parts, and finish a PulseMask build. Decorative prop files — not PPE, not a respirator.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2307090A'/%3E%3Cpath d='M18 10h28v33L32 54 18 43z' fill='%236EFF3C'/%3E%3C/svg%3E">
+<script>/* apply the saved theme before first paint — prevents a dark flash for
+   light-theme visitors; the end-of-body script still owns the button */
+try{document.documentElement.dataset.theme=localStorage.getItem('pulsemask.theme')||'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neon:#6EFF3C; --neon-2:#00E58A; --neon-ink:#0E8F35; --hz:#B57BFF;
+    --bg:#07090A; --bg-2:#0A0D0E; --panel:#0E1214; --panel-2:#131A1C;
+    --line:rgba(110,255,60,.14); --line-2:rgba(110,255,60,.30); --hair:rgba(255,255,255,.07);
+    --ink:#E6F2E4; --mid:#8FA394; --dim:#5A6B60;
+    --amber:#FFC24B; --good:#6EFF3C; --bad:#FF5C6E;
+    --glow:0 0 22px -6px var(--neon);
+    --grid:rgba(110,255,60,.045);
+    --bevel:polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 11px 100%, 0 calc(100% - 11px));
+  }
+  [data-theme="light"]{
+    --neon:#2FD41F; --neon-2:#00B36B; --neon-ink:#0B7A2C; --hz:#7A4FE0;
+    --bg:#EEF2EC; --bg-2:#F6F9F4; --panel:#FFFFFF; --panel-2:#F1F5EF;
+    --line:rgba(20,60,25,.16); --line-2:rgba(47,212,31,.55); --hair:rgba(20,40,25,.10);
+    --ink:#0C1410; --mid:#4A5A4E; --dim:#7C8C80;
+    --amber:#B87400; --good:#1B9E2A; --bad:#C8342F;
+    --glow:0 0 18px -8px rgba(47,212,31,.9);
+    --grid:rgba(20,60,25,.05);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:118px}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif; font-size:15px; line-height:1.55;
+    -webkit-font-smoothing:antialiased; text-wrap:pretty;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+                     linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:34px 34px;
+    transition:background-color .25s, color .25s;
+  }
+  a{color:var(--neon)} a:hover{color:var(--neon-2)}
+  a{text-decoration:none}
+  [data-theme="light"] a{color:var(--neon-ink)}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  .eyebrow{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--neon); opacity:.85}
+
+  header{
+    position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:16px;
+    padding:0 22px; height:56px; background:color-mix(in srgb, var(--bg) 86%, transparent);
+    -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--line);
+    box-shadow:0 1px 0 0 color-mix(in srgb, var(--neon) 22%, transparent);
+  }
+  .brand{display:flex; align-items:center; gap:9px; font-family:"Chakra Petch",sans-serif;
+    font-weight:700; font-size:17px; letter-spacing:.06em; text-transform:uppercase;
+    white-space:nowrap; flex:0 0 auto; color:var(--ink)}
+  .brand i{width:7px; height:16px; background:var(--neon); box-shadow:var(--glow);
+    display:block; clip-path:polygon(0 0,100% 0,100% 72%,50% 100%,0 72%)}
+  .brand small{font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.16em;
+    color:var(--dim); text-transform:uppercase; font-weight:400; padding-left:9px;
+    border-left:1px solid var(--hair); white-space:nowrap}
+  .wip{
+    font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--amber); border:1px solid color-mix(in srgb, var(--amber) 45%, transparent);
+    background:color-mix(in srgb, var(--amber) 10%, transparent);
+    padding:4px 10px; white-space:nowrap;
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+  }
+  nav{margin-left:auto; display:flex; gap:2px; align-items:center}
+  nav a{
+    font-family:"Chakra Petch",sans-serif; font-size:12.5px; font-weight:500; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--mid); padding:7px 12px; border:1px solid transparent;
+    white-space:nowrap;
+  }
+  nav a:hover{color:var(--ink); border-color:var(--line-2); box-shadow:var(--glow)}
+  [data-theme="light"] nav a{color:var(--mid)}
+  [data-theme="light"] nav a:hover{color:var(--ink)}
+  [data-theme="light"] .brand{color:var(--ink)}
+  [data-theme="light"] a.btn:not(.primary){color:var(--ink)}
+  nav a[aria-current="page"]{color:var(--neon); border-color:var(--line-2)}
+  #themeBtn{
+    margin-left:10px; font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.14em;
+    text-transform:uppercase; padding:7px 11px; background:transparent; cursor:pointer;
+    border:1px solid var(--line-2); color:var(--neon);
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+  }
+  #themeBtn:hover{background:color-mix(in srgb, var(--neon) 12%, transparent); box-shadow:var(--glow)}
+
+  /* persistent artwork-status band — same component on every page */
+  .artband{
+    position:sticky; top:56px; z-index:49;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:9px 22px; font-family:"IBM Plex Mono",monospace; font-size:11px; line-height:1.45;
+    color:var(--amber);
+    background:color-mix(in srgb, var(--amber) 11%, var(--bg));
+    border-bottom:1px solid color-mix(in srgb, var(--amber) 40%, transparent);
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  }
+  .artband b{letter-spacing:.18em; text-transform:uppercase; font-weight:600; font-size:10px;
+    border:1px solid color-mix(in srgb, var(--amber) 50%, transparent); padding:3px 8px;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .artband span{color:var(--mid)}
+  .artband span strong{color:var(--amber); font-weight:600}
+  .artband a{color:var(--amber); text-decoration:underline; text-underline-offset:3px}
+
+  main{max-width:1180px; margin:0 auto}
+  section{padding:46px 40px; border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:0}
+  h1{font-family:"Chakra Petch",sans-serif; font-size:38px; line-height:1.08; letter-spacing:-.01em;
+    margin:12px 0 16px; font-weight:700; max-width:22ch; text-transform:uppercase}
+  h2{font-family:"Chakra Petch",sans-serif; font-size:23px; letter-spacing:.01em; margin:0 0 8px;
+    font-weight:600; text-transform:uppercase}
+  h3{font-family:"Chakra Petch",sans-serif; font-size:14.5px; margin:0 0 6px; font-weight:600;
+    letter-spacing:.04em; text-transform:uppercase}
+  p{margin:0 0 12px; color:var(--mid); max-width:66ch}
+  p strong{color:var(--ink); font-weight:600}
+  em{color:var(--neon); font-style:normal}
+  hr{border:0; border-top:1px solid var(--line); margin:26px 0}
+  ul{margin:0 0 14px; padding-left:0; list-style:none; max-width:66ch}
+  li{font-size:13.5px; color:var(--mid); padding:5px 0 5px 20px; position:relative}
+  li::before{content:'▸'; position:absolute; left:2px; color:var(--neon);
+    font-family:"IBM Plex Mono",monospace; font-size:11px}
+  li b, li strong{color:var(--ink); font-weight:600}
+
+  .notice{
+    border:1px solid color-mix(in srgb, var(--amber) 45%, transparent);
+    background:color-mix(in srgb, var(--amber) 8%, transparent);
+    padding:16px 20px; margin:18px 0 0; clip-path:var(--bevel); max-width:900px;
+  }
+  .notice b{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--amber); display:block; margin-bottom:6px}
+  .notice p{font-size:12.5px; margin:0; max-width:none; color:var(--mid)}
+
+  .toc{display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0}
+  .toc a{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.12em;
+    text-transform:uppercase; border:1px solid var(--line); color:var(--mid); padding:7px 11px;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .toc a:hover{color:var(--ink); border-color:var(--line-2); box-shadow:var(--glow)}
+
+  .cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr)); gap:24px}
+  .card{background:var(--panel); border:1px solid var(--line); padding:20px 22px; margin:0 0 16px;
+    clip-path:var(--bevel); position:relative}
+  .card h3{margin-bottom:12px; color:var(--neon)}
+  .card p{font-size:13px; max-width:none}
+  .card ul{max-width:none}
+  .card li{font-size:12.5px}
+
+  .spec{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin:20px 0 0}
+  .spec > div{background:var(--panel); padding:13px 18px; display:grid;
+    grid-template-columns:minmax(0,1fr) auto; gap:18px; align-items:baseline}
+  .spec > div:hover{background:var(--panel-2)}
+  .spec .k{font-family:"Chakra Petch",sans-serif; font-size:12.5px; font-weight:600;
+    letter-spacing:.03em; text-transform:uppercase; color:var(--ink)}
+  .spec .kd{font-size:12px; color:var(--dim); margin-top:2px}
+  .spec .v{font-family:"IBM Plex Mono",monospace; font-size:14px; color:var(--neon);
+    white-space:nowrap; text-align:right}
+  .spec .v small{display:block; font-size:9.5px; color:var(--dim); letter-spacing:.08em;
+    text-transform:uppercase; margin-top:2px}
+
+  .steps{counter-reset:s; margin-top:20px}
+  .steps > li{list-style:none; counter-increment:s; padding:0 0 0 46px; position:relative;
+    margin-bottom:18px; font-size:13.5px}
+  .steps > li::before{content:counter(s,decimal-leading-zero);
+    font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--neon);
+    border:1px solid var(--line-2); padding:4px 8px; position:absolute; left:0; top:1px;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .steps > li b{display:block; color:var(--ink); font-family:"Chakra Petch",sans-serif;
+    font-size:13.5px; letter-spacing:.03em; text-transform:uppercase; margin-bottom:3px}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    padding:12px 16px; border:1px solid var(--line-2); background:transparent; color:var(--ink);
+    cursor:pointer;
+    clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+  }
+  .btn:hover{background:color-mix(in srgb, var(--neon) 10%, transparent); box-shadow:var(--glow); color:var(--ink)}
+  .btn.primary{background:var(--neon); border-color:var(--neon); color:#04140A; font-weight:600;
+    box-shadow:var(--glow)}
+  .btn.primary:hover{background:var(--neon-2); border-color:var(--neon-2); color:#04140A}
+
+  footer{padding:36px 40px 64px; color:var(--dim); font-size:12px; max-width:1180px; margin:0 auto}
+  footer p{color:var(--dim); font-size:12px; max-width:76ch}
+
+  @media (max-width:1340px){ .brand small{display:none} }
+  @media (max-width:1410px){ nav a{padding:7px 8px; font-size:11.5px} .wip{font-size:9px; padding:4px 7px} }
+  @media (max-width:1080px){
+    section{padding:34px 22px} h1{font-size:30px}
+    header{flex-wrap:wrap; height:auto; min-height:56px; padding:8px 14px; row-gap:4px}
+    nav{flex-wrap:wrap; justify-content:flex-end}
+    .artband{position:static}
+    html{scroll-padding-top:64px}
+  }
+
+  /* ── Touch & small-screen pass ────────────────────────────────────────────
+     Measured, not guessed. At 390px wide the chips, mini-buttons, theme
+     toggle and number inputs all came in under 32px tall, the slider's hit
+     box was its 1px track, and the 7-link nav wrapped to three rows — 117px
+     of header on a phone, 181px at 320px.
+
+     Two separate concerns, so two separate queries.
+
+     Layout is about width: below 760px the nav stops wrapping, takes its own
+     full-width row and scrolls sideways, which buys back a third of the
+     header. */
+  @media (max-width:760px){
+    nav{
+      flex:1 1 100%; margin-left:0; flex-wrap:nowrap; justify-content:flex-start;
+      overflow-x:auto; overscroll-behavior-x:contain;
+      scrollbar-width:none; -ms-overflow-style:none;
+    }
+    nav::-webkit-scrollbar{display:none}
+    nav a{flex:0 0 auto}
+    #themeBtn{flex:0 0 auto; margin-left:6px}
+  }
+
+  /* Target size is about the pointer, not the width — an iPad in portrait is
+     768px and still a thumb. pointer:coarse catches every touch device at any
+     size; the width clause keeps a narrow desktop window honest too.
+     40px floor: WCAG 2.5.8 asks 24px, but 40 is the comfortable floor for a
+     thumb and these are bevelled boxes with room to grow. Inline prose links
+     are deliberately untouched — they are exempt from the rule, and padding
+     them would wreck the line rhythm. */
+  @media (max-width:760px), (pointer:coarse){
+    nav a, #themeBtn{padding:11px 12px}
+    .chip, .btn, .mini, .toc a, .jump a, .prog button{
+      min-height:40px; display:inline-flex; align-items:center; justify-content:center;
+    }
+    input[type=number], input[type=text]{min-height:40px}
+
+    /* Grow the slider to 36px and repaint the same 1px line with a centred
+       gradient, so the look is unchanged and only the grab area moves. */
+    input[type=range]{
+      height:36px;
+      background:linear-gradient(var(--line-2),var(--line-2)) center/100% 1px no-repeat;
+    }
+    input[type=range]::-webkit-slider-runnable-track{height:36px; background:transparent}
+
+    /* The 12px diamond is the design; the label around it carries the hit
+       area, so grow the label rather than the control. */
+    .check{padding:15px 0; min-height:44px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="brand" href="index.html" style="text-decoration:none"><i></i>PulseMask <small>Pulse Lab · Aurelius Dynamic</small></a>
+  <div class="wip">Prototype · work in progress</div>
+  <nav>
+    <a href="index.html#generator">Generator</a>
+    <a href="mission.html">Mission</a>
+    <a href="index.html#roadmap">Roadmap</a>
+    <a href="guide.html" aria-current="page">Guide</a>
+    <a href="assembly.html">Assembly</a>
+    <a href="shader-lab.html">Shader Lab</a>
+    <a href="pricing.html">Pricing</a>
+    <button id="themeBtn" type="button">◐ Light</button>
+  </nav>
+</header>
+
+<div class="artband">
+  <b>Artwork</b>
+  <span>PulseMask is <strong>a design study sold as wearable art</strong> — a decorative prop.
+  It is not a respirator, not PPE, not a medical device, and it provides no protection of any
+  kind. <a href="mission.html#isnot">Full scope statement</a></span>
+</div>
+
+<main>
+
+<section id="top">
+  <div class="eyebrow">Guide · print &amp; fit</div>
+  <h1>From a photograph to a finished piece.</h1>
+  <p>This is the working guide for everything that happens on your side of the file: how to shoot
+  a portrait the generator can actually use, what comes down in the download, how to print parts
+  that hold their surfaces, and what to buy rather than print. Read it before you order a
+  Photo-Fit — a good portrait costs you five minutes and saves a revision round.</p>
+
+  <div class="notice">
+    <b>Read this first</b>
+    <p><strong style="color:var(--amber)">PulseMask is a design study, sold as wearable art.</strong>
+    These files produce a decorative prop / costume / maker piece. It is <strong>not a
+    respirator, not PPE, and not a medical device</strong> — it is untested to NIOSH 42 CFR 84,
+    EN 136/143 and ISO 16900, provides no respiratory protection, and must never be relied on as
+    protective equipment. UV-C hardware is an eye and skin hazard; no electronics are included or
+    supported.</p>
+  </div>
+
+  <div class="toc">
+    <a href="#download">01 · In the download</a>
+    <a href="#portrait">02 · Shooting the portrait</a>
+    <a href="#printing">03 · Printing it</a>
+    <a href="#assembly">04 · Finishing &amp; assembly</a>
+    <a href="assembly.html">→ Full assembly walkthrough</a>
+  </div>
+</section>
+
+<section id="download">
+  <div class="eyebrow">01 · In the download</div>
+  <h2>What you actually receive</h2>
+  <p>Every tier ships the same multi-part model, generated at your measurements or at a stock
+  size. Geometry is written in millimetres — the scale every slicer expects — and each part is a
+  separate named, closed mesh, so you load them as separate objects and choose what prints.</p>
+
+  <div class="spec">
+    <div>
+      <div><div class="k">Format</div>
+        <div class="kd">Binary STL in millimetres, ready to slice. OBJ + MTL and GLB export from the generator too.</div></div>
+      <div class="v">STL · mm</div>
+    </div>
+    <div>
+      <div><div class="k">Parts in a default build</div>
+        <div class="kd">Shell, visor frame and gasket, seal bead, inner oronasal cup, canister stack, exhale valves, strap anchors, and the Galea layer if your tier includes it</div></div>
+      <div class="v">30 <small>named meshes</small></div>
+    </div>
+    <div>
+      <div><div class="k">Mesh density</div>
+        <div class="kd">At default tessellation. The shell carries most of it; hardware parts are lathed at low segment counts on purpose</div></div>
+      <div class="v">80.4k <small>triangles</small></div>
+    </div>
+    <div>
+      <div><div class="k">Default face envelope</div>
+        <div class="kd">Bizygomatic width × nasion-to-menton height for the 63 mm reference IPD. Your Photo-Fit is generated at your own numbers</div></div>
+      <div class="v">140 × 122 <small>mm</small></div>
+    </div>
+    <div>
+      <div><div class="k">Seal rim path</div>
+        <div class="kd">Perimeter length of the sealing bead — useful if you are cutting a foam or silicone facing for comfort</div></div>
+      <div class="v">548 <small>mm</small></div>
+    </div>
+    <div>
+      <div><div class="k">Shell mass, printed</div>
+        <div class="kd">Solid volume of the outer shell at PA12 density. Your figure moves with wall thickness and print process</div></div>
+      <div class="v">49 g <small>· 48.3 cm³</small></div>
+    </div>
+  </div>
+
+  <p style="margin-top:18px; font-size:12.5px">Those numbers come from the generator's own headless
+  readout at default parameters — <span class="mono">node cli.mjs --metrics-only</span> — not from
+  a printed sample. Change the sliders and they change with you.</p>
+</section>
+
+<section id="portrait">
+  <div class="eyebrow">02 · Shooting the portrait</div>
+  <h2>The photograph is the measurement</h2>
+  <p>Photo-Fit reads one image and one number. Get both right and the rest is automatic; get
+  either wrong and you have spent a revision round finding out.</p>
+
+  <h3>What a usable portrait is</h3>
+  <p>One photograph, taken straight on and lit flat. Both pupils visible, eyes open, neutral
+  expression, lips closed and relaxed. No glasses. Hair back off the brow, jaw and ears.</p>
+  <p>Even light is not an aesthetic preference here. The relief pass subtracts a blurred copy of
+  your photograph to strip out the lighting gradient — that works because a gradient is smooth. A
+  hard shadow edge is not. It survives the filter and gets built as though it were a crease in
+  your face.</p>
+  <p>Camera at eye height, about two metres back, then zoom or crop rather than stepping closer. A
+  phone at arm's length is a wide lens near a face: it pushes the nose forward and pulls
+  everything outboard of it back. Every dimension in your file is a ratio between landmarks, and
+  foreshortening moves those ratios before we ever see them.</p>
+  <p>Resolution is not the constraint — the portrait is resampled to <span class="mono">460 px</span>
+  wide before anything is measured. Focus and unfiltered skin matter more than megapixels.</p>
+
+  <h3>Measuring your interpupillary distance</h3>
+  <p>This is the only real-world measurement you supply, and every absolute dimension descends
+  from it. It sets <span class="mono">mmPerPx</span> for the whole image; face width comes out as
+  <span class="mono">IPD × 2.22</span> clamped to <span class="mono">118–168 mm</span>, and face
+  height scales off the eye-line-to-menton distance read in those same millimetres. A wrong IPD
+  gives you a correctly proportioned mask at the wrong size.</p>
+  <p>Ask your optician for your <strong>distance PD</strong> — if it comes back as two monocular
+  figures, right and left, add them. Otherwise use a mirror: stand close, hold a ruler flat
+  against your brow, close one eye and align the zero mark with the centre of the open eye's
+  reflected pupil, then swap eyes without moving the ruler and read off the other. Do it three
+  times, take the middle value.</p>
+  <p>The field ships at <span class="mono">63 mm</span> and accepts <span class="mono">48–78 mm</span>.
+  <span class="mono">63</span> is a population placeholder, not your face — it will be wrong for
+  you by an amount you cannot guess by looking.</p>
+
+  <h3>The five landmarks</h3>
+  <p>Five points get placed on the portrait: <strong>left pupil</strong>, <strong>right pupil</strong>,
+  <strong>nose tip</strong>, <strong>mouth</strong>, <strong>menton</strong>. The pupils do two
+  jobs — their separation carries the scale, and the line between them sets rotation, so a slight
+  head tilt is corrected provided both are visible. Nose tip is the most forward point of the
+  nose. Mouth is the centre of the lip seam, relaxed. Menton is the lowest point of the chin on
+  the centreline — not the front of the jaw, not the underside of the throat. Eye line to menton
+  drives face height; where the nose sits between the two drives nose scale against a canonical
+  ratio of <span class="mono">0.411</span>.</p>
+
+  <h3>What the relief pass recovers</h3>
+  <p>Your photograph is sampled onto an <span class="mono">88 × 110</span> grid in canonical face
+  coordinates, converted to Rec.709 luminance, blurred with a separable box filter of radius
+  <span class="mono">9</span>, and the blur subtracted. What is left is normalised to
+  <span class="mono">±1</span> and drives relief at a default <span class="mono">4.5 mm</span>
+  amplitude.</p>
+  <p>That recovers surface structure — nostril creases, the lip line, brow and cheek modelling. It
+  does not recover depth. A bright pixel is not a near pixel; it is a pixel where the light
+  landed. Single-image capture cannot recover metric depth: proportion comes from the landmarks,
+  texture from photometry, and neither is a validated seal. A fit you could trust needs a depth
+  scan or a plaster cast. These are decorative wearable-art files — not PPE, not a respirator, not
+  a medical device, and they provide no protection.</p>
+
+  <h3>What gets a portrait rejected</h3>
+  <ul>
+    <li>Glasses on. Frames and lens glare sit exactly where the pupils have to be read.</li>
+    <li>A pupil hidden — three-quarter turn, hair across an eye, a blink.</li>
+    <li>Smile, open mouth or clenched jaw. Mouth and menton both move.</li>
+    <li>One hard lamp or direct sun, throwing a cast shadow across the nose or one cheek.</li>
+    <li>Beauty filters, skin smoothing or portrait-mode blur bleeding onto the jaw — smoothing
+      deletes the exact detail band the relief pass reads.</li>
+    <li>Shot at arm's length.</li>
+    <li>Chin or jawline covered by a collar, scarf or hat-brim shadow.</li>
+    <li>No IPD supplied, or an IPD you guessed.</li>
+  </ul>
+</section>
+
+<section id="printing">
+  <div class="eyebrow">03 · Printing it</div>
+  <h2>Getting parts that hold their surfaces</h2>
+  <p>Load the files as separate objects, not as one body. Every part is its own closed mesh and
+  they overlap rather than boolean-union — slicers handle that, but it means you choose what
+  prints and in what orientation, part by part.</p>
+
+  <h3>Will it fit your bed</h3>
+  <p>Measured off the default build, as generated and before you reorient anything:</p>
+  <div class="spec">
+    <div>
+      <div><div class="k">Shell</div>
+        <div class="kd">The one part that has to come out right. Largest single printed piece of the core mask</div></div>
+      <div class="v">141 × 198 × 56 <small>mm</small></div>
+    </div>
+    <div>
+      <div><div class="k">Whole assembly, Galea included</div>
+        <div class="kd">Everything except the face form, in its assembled position — the envelope you would need to print it as one impossible block</div></div>
+      <div class="v">189 × 249 × 174 <small>mm</small></div>
+    </div>
+    <div>
+      <div><div class="k">Face-form bust</div>
+        <div class="kd">Display and test-fit piece, included with Photo-Fit. The tallest thing in the set</div></div>
+      <div class="v">161 × 239 × 67 <small>mm</small></div>
+    </div>
+    <div>
+      <div><div class="k">Solar horn, one side</div>
+        <div class="kd">Swept and curving, so its bounding box is mostly air — lay it diagonally</div></div>
+      <div class="v">185 × 95 × 102 <small>mm</small></div>
+    </div>
+  </div>
+  <p style="margin-top:18px">A <span class="mono">200 × 200</span> bed takes the shell and every
+  core part. The bust and the horns want <span class="mono">250 mm</span> in one axis or a cut and
+  a joint. Nothing here is designed with split lines — if you cut a part, you are choosing where
+  the seam lands.</p>
+
+  <h3>Why the design assumes SLS nylon</h3>
+  <p>The shell is drawn around SLS PA12 at a <span class="mono">2.6 mm</span> wall. PA12 is tough
+  where photopolymer is brittle, and a resin shell that cracks at the visor aperture during a fall
+  is a failure mode with your eyes behind it. SLS also prints the shell unsupported, which is the
+  part that actually matters: no support scars land on the sealing face, and that surface has to
+  stay smooth or the bead sits on ridges.</p>
+  <p>Sending it to an SLS bureau is the low-effort route. You upload the shell, you get a part.</p>
+
+  <h3>If you are printing FDM or resin</h3>
+  <p>Both work for a decorative build. What changes is where you spend your attention — the notes
+  below are general printing craft rather than anything the model measures for you:</p>
+  <ul>
+    <li><strong>Shell</strong> — face down or face up, never on its side. Supports touching the
+      inner sealing face are the one thing to avoid; scars there are the difference between a bead
+      that beds down and one that rocks. At <span class="mono">2.6 mm</span> there is enough wall
+      to sand layer lines back hard.</li>
+    <li><strong>Inner oronasal cup</strong> — <span class="mono">1.8 mm</span> wall, so it is the
+      thinnest structural part in the set. Print it slow and warm; a cup that delaminates at the
+      rim is scrap.</li>
+    <li><strong>Seal bead</strong> — an <span class="mono">8.4 mm</span> section tube following the
+      rim. It exists to be soft. Print it in TPU if you have it, or treat the printed version as a
+      pattern for a silicone pour.</li>
+    <li><strong>Canister stack</strong> — reactor housing, filter cartridge and collar are lathed
+      at low segment counts on purpose, so the flats are design, not faceting artefacts. They
+      print upright with no drama.</li>
+    <li><strong>Scale hood</strong> — <span class="mono">160</span> plates, each about
+      <span class="mono">11 × 11 mm</span> and roughly a millimetre thick. Fine on SLS, fiddly on
+      FDM at a 0.4 mm nozzle, excellent on resin.</li>
+    <li><strong>EL-wire runs</strong> — <span class="mono">3.4 mm</span> swept tubes tracing the
+      armour seams. They are the small-feature risk on any machine, and they are the first thing
+      to drop from a first test print.</li>
+    <li><strong>Crest antenna and status strip</strong> — millimetre-scale detail
+      (<span class="mono">17 × 14 × 3 mm</span> and <span class="mono">26 × 3.5 × 4 mm</span>).
+      Resin or nothing, realistically.</li>
+  </ul>
+
+  <h3>Before you start a long print</h3>
+  <p>Two things worth knowing about these meshes. Parts overlap rather than boolean-union — each
+  one is individually closed and slicers cope, but the union is not a single watertight solid, so
+  do not expect a boolean-heavy workflow to be free. And there is <strong>no manifold check in the
+  pipeline yet</strong>: the geometry is generated closed by construction, not verified closed by
+  a validator. Run your slicer's repair pass and look at the preview before you commit eight hours
+  to a shell.</p>
+  <p>The visor is not on this list because it is not a printed part. That one is cut from sheet —
+  see <a href="#assembly">finishing and assembly</a>.</p>
+</section>
+
+<section id="assembly">
+  <div class="eyebrow">04 · Finishing &amp; assembly</div>
+  <h2>After the printer stops</h2>
+  <p>What follows is the summary. The full stage-by-stage build — tools, consumables, assembly
+  order, strap fitting, care and troubleshooting, with a checklist that remembers where you
+  stopped — lives on the <a href="assembly.html"><strong>assembly walkthrough</strong></a>.</p>
+
+  <h3>What you source, not print</h3>
+  <p><span class="mono">visor_lens</span> ships as a solid mesh. It is not a part to print. Cut it
+  from polycarbonate sheet: the lens is modelled at <span class="mono">2.2 mm</span> over a
+  rounded-hexagon aperture of half-extents <span class="mono">56.5 × 29.2 mm</span>, and that edge
+  curves in three dimensions, so a flat cut needs heat-forming to seat. Polycarbonate, not acrylic
+  — one deforms, the other cracks, and your eyes are behind it.</p>
+  <p><span class="mono">visor_gasket</span> is a <span class="mono">4.8 mm</span> silicone tube
+  seated <span class="mono">1.2 mm</span> behind the shell surface: print it soft, or substitute
+  4.8 mm cord. Strap anchors sit at 16°, 164°, 206° and 334°, each a 26 × 12 mm loop swept at
+  2.7 mm, leaving a clear slot near <span class="mono">20 × 6.6 mm</span>. EL wire at
+  <span class="mono">2–3 mm</span> for the seam runs. Fasteners you supply entirely — no bosses,
+  no threads, no snap features anywhere in the geometry, and parts overlap rather than
+  boolean-union, so every mating face is interference by construction. Plan on adhesive, and on
+  sanding faces back until they seat.</p>
+
+  <h3>Order of assembly</h3>
+  <p>The exploded view is the assembly drawing. <span class="mono">shell_outer</span>,
+  <span class="mono">vent_slats</span>, <span class="mono">el_wire</span> and
+  <span class="mono">dragon_scales</span> do not move in it — they are shell surface and never
+  separate. Shell first, finished and painted. Then the visor: gasket into the aperture, lens into
+  the gasket, while you can still reach it from behind. Then the chin stack outward in reverse
+  airflow order — <span class="mono">canister_collar</span>,
+  <span class="mono">pzt_blower_stack</span>, <span class="mono">uvc_reactor_housing</span>,
+  <span class="mono">pzt_capsid_ring</span>, <span class="mono">filter_cartridge</span>,
+  <span class="mono">pzt_coalescer</span>, then <span class="mono">intake_grille</span> as the cap.
+  Then the interior: <span class="mono">oronasal_cup</span> before <span class="mono">seal_lip</span>
+  and the <span class="mono">pzt_seal_sensor</span> pucks. Galea last, onto finished paint. Anchors
+  and webbing close it out.</p>
+
+  <h3>Surface prep and finish</h3>
+  <p>SLS PA12 arrives matt and slightly porous: bead-blast, then filler-prime for anything above
+  satin. The <span class="mono">2.6 mm</span> wall gives room to sand FDM layer lines hard. Mask
+  every mating face before you spray — there is no clearance to give back.</p>
+  <p>A <a href="shader-lab.html">Shader Lab</a> spec code is a colour and finish reference, not a
+  printing instruction. It swaps a material, never geometry, and only
+  <span class="mono">shell_polymer</span>, <span class="mono">bronze</span> and
+  <span class="mono">cartridge_alloy</span> accept one. Order
+  <span class="mono">PM1-HEXPLATE-85</span> and no hex plates appear in your STL. You get a colour
+  and a sheen: shell <span class="mono">#dcd6c9</span> at roughness 0.58, bronze
+  <span class="mono">#9c7c46</span> at 0.34. Roughness is a PBR parameter, not a gloss unit — read
+  0.58 as satin, 0.34 as semi-gloss, and match on a spray-out card, not a screen.</p>
+  <p>Horns, pouch cells, PV arrays, LED arrays and PZT rings are sculpt, not electronics. They
+  print as solids: no cell cavity, no wire route, no emitter seat.
+  <span class="mono">uv_status_band</span> is a status indicator rather than a window. Nothing in
+  the download is a working assembly.</p>
+
+  <div class="notice">
+    <b>Safety</b>
+    <p><strong style="color:var(--amber)">Never install a UV-C emitter. That constraint is not
+    negotiable at any price.</strong> UV-C is a serious eye and skin hazard. The reactor is drawn
+    fully enclosed with no line of sight to the wearer, and that is the reason. If you light the
+    piece, keep the visor aperture edges and the design's line-of-sight rules intact, and use EL
+    wire or visible LEDs only. No electronics are included or supported.<br><br>
+    PulseMask is a design study sold as wearable art. It is not a respirator, not PPE and not a
+    medical device. It is untested to NIOSH 42 CFR 84, EN 136/143 and ISO 16900, it provides no
+    respiratory protection whatsoever, and it must never be relied on as protective equipment. Do
+    not wear it as protection.</p>
+  </div>
+
+  <hr>
+
+  <p style="font-size:12.5px">Stuck on something this page does not cover? Write to
+  <a href="mailto:build@aureliusdynamic.com">build@aureliusdynamic.com</a> — questions that come up
+  twice end up here. Ready to order, or want the full terms first? The
+  <a href="pricing.html">pricing page</a> has both.</p>
+</section>
+
+</main>
+
+<footer>
+  <p><strong style="color:var(--mid)">Status:</strong> prototype / work in progress. PulseMask is a
+  design and engineering study by a sole proprietor. Files sold here are digital files for
+  decorative and educational use. Nothing sold here is a certified respirator, PPE or a medical
+  device; nothing is tested to NIOSH 42 CFR 84, EN 136/143 or ISO 16900; no protective performance
+  is claimed or implied. Germicidal and capsid-disruption figures on the main page are modelled,
+  not measured.</p>
+  <hr>
+  <p class="mono" style="font-size:10.5px">© 2026 Aurelius Dynamic · Pulse Lab ·
+  <a href="mailto:build@aureliusdynamic.com">build@aureliusdynamic.com</a> ·
+  <a href="index.html#generator">generator</a> · <a href="mission.html">mission</a> ·
+  <a href="assembly.html">assembly</a> · <a href="pricing.html">pricing</a> ·
+  no analytics, no cookies, no backend on this page.</p>
+</footer>
+
+<script>
+  const THEME_KEY = 'pulsemask.theme';
+  function setTheme(t){
+    document.documentElement.dataset.theme = t;
+    document.getElementById('themeBtn').textContent = t === 'dark' ? '◐ Light' : '◑ Dark';
+    try { localStorage.setItem(THEME_KEY, t); } catch(e){}
+  }
+  document.getElementById('themeBtn').addEventListener('click', ()=>{
+    setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+  });
+  let saved = 'dark';
+  try { saved = localStorage.getItem(THEME_KEY) || 'dark'; } catch(e){}
+  setTheme(saved);
+</script>
+</body>
+</html>

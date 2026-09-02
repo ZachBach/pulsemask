@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mission &amp; status — PulseMask · Aurelius Dynamic</title>
+<meta name="description" content="What PulseMask is, what it is not, and exactly how far along it is. A wearable-art design study in respirator form — not PPE, not a medical device.">
+<meta property="og:title" content="Mission &amp; status — PulseMask">
+<meta property="og:description" content="A wearable-art design study in respirator form. Every number on this page is modelled, not measured — including the ones that fail.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2307090A'/%3E%3Cpath d='M18 10h28v33L32 54 18 43z' fill='%236EFF3C'/%3E%3C/svg%3E">
+<script>/* apply the saved theme before first paint — prevents a dark flash for
+   light-theme visitors; the end-of-body script still owns the button */
+try{document.documentElement.dataset.theme=localStorage.getItem('pulsemask.theme')||'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neon:#6EFF3C; --neon-2:#00E58A; --neon-ink:#0E8F35; --hz:#B57BFF;
+    --bg:#07090A; --bg-2:#0A0D0E; --panel:#0E1214; --panel-2:#131A1C;
+    --line:rgba(110,255,60,.14); --line-2:rgba(110,255,60,.30); --hair:rgba(255,255,255,.07);
+    --ink:#E6F2E4; --mid:#8FA394; --dim:#5A6B60;
+    --amber:#FFC24B; --good:#6EFF3C; --bad:#FF5C6E;
+    --glow:0 0 22px -6px var(--neon);
+    --grid:rgba(110,255,60,.045);
+    --bevel:polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 11px 100%, 0 calc(100% - 11px));
+  }
+  [data-theme="light"]{
+    --neon:#2FD41F; --neon-2:#00B36B; --neon-ink:#0B7A2C; --hz:#7A4FE0;
+    --bg:#EEF2EC; --bg-2:#F6F9F4; --panel:#FFFFFF; --panel-2:#F1F5EF;
+    --line:rgba(20,60,25,.16); --line-2:rgba(47,212,31,.55); --hair:rgba(20,40,25,.10);
+    --ink:#0C1410; --mid:#4A5A4E; --dim:#7C8C80;
+    --amber:#B87400; --good:#1B9E2A; --bad:#C8342F;
+    --glow:0 0 18px -8px rgba(47,212,31,.9);
+    --grid:rgba(20,60,25,.05);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:110px}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif; font-size:15px; line-height:1.55;
+    -webkit-font-smoothing:antialiased; text-wrap:pretty;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+                     linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:34px 34px;
+    transition:background-color .25s, color .25s;
+  }
+  a{color:var(--neon); text-decoration:none} a:hover{color:var(--neon-2)}
+  [data-theme="light"] a{color:var(--neon-ink)}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  .eyebrow{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--neon); opacity:.85}
+
+  header{
+    position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:16px;
+    padding:0 22px; height:56px; background:color-mix(in srgb, var(--bg) 86%, transparent);
+    -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--line);
+    box-shadow:0 1px 0 0 color-mix(in srgb, var(--neon) 22%, transparent);
+  }
+  .brand{display:flex; align-items:center; gap:9px; font-family:"Chakra Petch",sans-serif;
+    font-weight:700; font-size:17px; letter-spacing:.06em; text-transform:uppercase;
+    white-space:nowrap; flex:0 0 auto; color:var(--ink)}
+  .brand i{width:7px; height:16px; background:var(--neon); box-shadow:var(--glow);
+    display:block; clip-path:polygon(0 0,100% 0,100% 72%,50% 100%,0 72%)}
+  .brand small{font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.16em;
+    color:var(--dim); text-transform:uppercase; font-weight:400; padding-left:9px;
+    border-left:1px solid var(--hair); white-space:nowrap}
+  .wip{
+    font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--amber); border:1px solid color-mix(in srgb, var(--amber) 45%, transparent);
+    background:color-mix(in srgb, var(--amber) 10%, transparent);
+    padding:4px 10px; white-space:nowrap;
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+  }
+  nav{margin-left:auto; display:flex; gap:2px; align-items:center}
+  nav a{
+    font-family:"Chakra Petch",sans-serif; font-size:12.5px; font-weight:500; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--mid); padding:7px 12px; border:1px solid transparent;
+    white-space:nowrap;
+  }
+  nav a:hover{color:var(--ink); border-color:var(--line-2); box-shadow:var(--glow)}
+  nav a[aria-current="page"]{color:var(--neon); border-color:var(--line-2)}
+  [data-theme="light"] .brand{color:var(--ink)}
+  #themeBtn{
+    margin-left:10px; font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.14em;
+    text-transform:uppercase; padding:7px 11px; background:transparent; cursor:pointer;
+    border:1px solid var(--line-2); color:var(--neon);
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+  }
+  #themeBtn:hover{background:color-mix(in srgb, var(--neon) 12%, transparent); box-shadow:var(--glow)}
+
+  /* persistent art-status band — sits under the header on every page */
+  .artband{
+    position:sticky; top:56px; z-index:49;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:9px 22px; font-family:"IBM Plex Mono",monospace; font-size:11px; line-height:1.45;
+    color:var(--amber);
+    background:color-mix(in srgb, var(--amber) 11%, var(--bg));
+    border-bottom:1px solid color-mix(in srgb, var(--amber) 40%, transparent);
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  }
+  .artband b{letter-spacing:.18em; text-transform:uppercase; font-weight:600; font-size:10px;
+    border:1px solid color-mix(in srgb, var(--amber) 50%, transparent); padding:3px 8px;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .artband span{color:var(--mid)}
+  .artband span strong{color:var(--amber); font-weight:600}
+
+  main{max-width:1180px; margin:0 auto}
+  section{padding:46px 40px; border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:0}
+  h1{font-family:"Chakra Petch",sans-serif; font-size:38px; line-height:1.08; letter-spacing:-.01em;
+    margin:12px 0 16px; font-weight:700; max-width:20ch; text-transform:uppercase}
+  h2{font-family:"Chakra Petch",sans-serif; font-size:23px; letter-spacing:.01em; margin:0 0 8px;
+    font-weight:600; text-transform:uppercase}
+  h3{font-family:"Chakra Petch",sans-serif; font-size:14.5px; margin:0 0 6px; font-weight:600;
+    letter-spacing:.04em; text-transform:uppercase}
+  p{margin:0 0 12px; color:var(--mid); max-width:66ch}
+  p strong{color:var(--ink); font-weight:600}
+  em{color:var(--neon); font-style:normal}
+  hr{border:0; border-top:1px solid var(--line); margin:26px 0}
+  ul{margin:0 0 14px; padding-left:0; list-style:none; max-width:66ch}
+  li{font-size:13.5px; color:var(--mid); padding:5px 0 5px 20px; position:relative}
+  li::before{content:'▸'; position:absolute; left:2px; color:var(--neon);
+    font-family:"IBM Plex Mono",monospace; font-size:11px}
+  li b, li strong{color:var(--ink); font-weight:600}
+
+  .lede{font-size:17px; line-height:1.6; color:var(--ink); max-width:62ch}
+
+  .notice{
+    border:1px solid color-mix(in srgb, var(--amber) 45%, transparent);
+    background:color-mix(in srgb, var(--amber) 8%, transparent);
+    padding:16px 20px; margin:18px 0 0; clip-path:var(--bevel); max-width:900px;
+  }
+  .notice b{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--amber); display:block; margin-bottom:6px}
+  .notice p{font-size:12.5px; margin:0; max-width:none; color:var(--mid)}
+
+  .toc{display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0}
+  .toc a{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.12em;
+    text-transform:uppercase; border:1px solid var(--line); color:var(--mid); padding:7px 11px;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .toc a:hover{color:var(--ink); border-color:var(--line-2); box-shadow:var(--glow)}
+
+  .cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr)); gap:24px}
+  .card{background:var(--panel); border:1px solid var(--line); padding:20px 22px; margin:0 0 16px;
+    clip-path:var(--bevel)}
+  .card h3{margin-bottom:10px; color:var(--neon)}
+  .card p{font-size:13px; max-width:none}
+  .card ul{max-width:none} .card li{font-size:12.5px}
+
+  /* two-column "is / is not" */
+  .isnot{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr)); gap:1px;
+    background:var(--line); border:1px solid var(--line); margin-top:22px}
+  .isnot > div{background:var(--panel); padding:22px 24px}
+  .isnot h3{margin-bottom:12px}
+  .isnot .yes h3{color:var(--neon)}
+  .isnot .no h3{color:var(--bad)}
+  .isnot .no li::before{content:'✕'; color:var(--bad); font-size:10px; top:6px}
+  .isnot ul{margin:0}
+
+  /* status readout */
+  .spec{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin:20px 0 0}
+  .spec > div{background:var(--panel); padding:13px 18px; display:grid;
+    grid-template-columns:minmax(0,1fr) auto; gap:18px; align-items:baseline}
+  .spec > div:hover{background:var(--panel-2)}
+  .spec .k{font-family:"Chakra Petch",sans-serif; font-size:12.5px; font-weight:600;
+    letter-spacing:.03em; text-transform:uppercase; color:var(--ink)}
+  .spec .kd{font-size:12px; color:var(--dim); margin-top:2px}
+  .spec .v{font-family:"IBM Plex Mono",monospace; font-size:14px; color:var(--neon);
+    white-space:nowrap; text-align:right}
+  .spec .v small{display:block; font-size:9.5px; color:var(--dim); letter-spacing:.08em;
+    text-transform:uppercase; margin-top:2px}
+  .spec .v.warn{color:var(--amber)} .spec .v.bad{color:var(--bad)}
+
+  /* TRL gauge */
+  .trl{display:grid; grid-template-columns:repeat(9,1fr); gap:3px; margin:18px 0 10px; max-width:640px}
+  .trl div{height:38px; background:var(--panel-2); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--dim);
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .trl div.on{background:color-mix(in srgb, var(--neon) 22%, var(--panel));
+    border-color:var(--line-2); color:var(--ink); font-weight:600; box-shadow:var(--glow)}
+  .trl div.here{background:var(--amber); border-color:var(--amber); color:#20140A; font-weight:700}
+
+  /* roadmap */
+  .rm{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:20px}
+  .rm > div{background:var(--panel); padding:17px 20px; display:grid;
+    grid-template-columns:88px minmax(0,220px) minmax(0,1fr) auto; gap:18px; align-items:baseline}
+  .rm > div:hover{background:var(--panel-2)}
+  .pill{font-family:"IBM Plex Mono",monospace; font-size:9px; letter-spacing:.16em;
+    text-transform:uppercase; padding:4px 9px; border:1px solid var(--line); color:var(--dim);
+    white-space:nowrap; justify-self:end;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .pill.done{color:var(--neon); border-color:var(--line-2)}
+  .pill.now{color:var(--amber); border-color:color-mix(in srgb, var(--amber) 50%, transparent);
+    background:color-mix(in srgb, var(--amber) 10%, transparent)}
+  .rm .ph{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--hz)}
+  .rm .nm{font-weight:600; font-size:13.5px; color:var(--ink)}
+  .rm .ds{color:var(--mid); font-size:12.5px}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    padding:12px 16px; border:1px solid var(--line-2); background:transparent; color:var(--ink);
+    cursor:pointer;
+    clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+  }
+  .btn:hover{background:color-mix(in srgb, var(--neon) 10%, transparent); box-shadow:var(--glow); color:var(--ink)}
+  .btn.primary{background:var(--neon); border-color:var(--neon); color:#04140A; font-weight:600;
+    box-shadow:var(--glow)}
+  .btn.primary:hover{background:var(--neon-2); border-color:var(--neon-2); color:#04140A}
+  [data-theme="light"] .btn:not(.primary){color:var(--ink)}
+  .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:20px}
+
+  footer{padding:36px 40px 64px; color:var(--dim); font-size:12px; max-width:1180px; margin:0 auto}
+  footer p{color:var(--dim); font-size:12px; max-width:76ch}
+
+  @media (max-width:1340px){ .brand small{display:none} }
+  @media (max-width:1410px){ nav a{padding:7px 8px; font-size:11.5px} .wip{font-size:9px; padding:4px 7px} }
+  @media (max-width:1080px){
+    section{padding:34px 22px} h1{font-size:30px}
+    header{flex-wrap:wrap; height:auto; min-height:56px; padding:8px 14px; row-gap:4px}
+    nav{flex-wrap:wrap; justify-content:flex-end}
+    .artband{position:static}
+    html{scroll-padding-top:64px}
+    .rm > div{grid-template-columns:minmax(0,1fr) auto}
+    .rm > div > :nth-child(1){grid-row:1; grid-column:1}
+    .rm > div > :nth-child(4){grid-row:1; grid-column:2}
+    .rm > div > :nth-child(2), .rm > div > :nth-child(3){grid-column:1 / -1}
+    .trl{grid-template-columns:repeat(5,1fr)}
+  }
+
+  /* ── Touch & small-screen pass ────────────────────────────────────────────
+     Measured, not guessed. At 390px wide the chips, mini-buttons, theme
+     toggle and number inputs all came in under 32px tall, the slider's hit
+     box was its 1px track, and the 7-link nav wrapped to three rows — 117px
+     of header on a phone, 181px at 320px.
+
+     Two separate concerns, so two separate queries.
+
+     Layout is about width: below 760px the nav stops wrapping, takes its own
+     full-width row and scrolls sideways, which buys back a third of the
+     header. */
+  @media (max-width:760px){
+    nav{
+      flex:1 1 100%; margin-left:0; flex-wrap:nowrap; justify-content:flex-start;
+      overflow-x:auto; overscroll-behavior-x:contain;
+      scrollbar-width:none; -ms-overflow-style:none;
+    }
+    nav::-webkit-scrollbar{display:none}
+    nav a{flex:0 0 auto}
+    #themeBtn{flex:0 0 auto; margin-left:6px}
+  }
+
+  /* Target size is about the pointer, not the width — an iPad in portrait is
+     768px and still a thumb. pointer:coarse catches every touch device at any
+     size; the width clause keeps a narrow desktop window honest too.
+     40px floor: WCAG 2.5.8 asks 24px, but 40 is the comfortable floor for a
+     thumb and these are bevelled boxes with room to grow. Inline prose links
+     are deliberately untouched — they are exempt from the rule, and padding
+     them would wreck the line rhythm. */
+  @media (max-width:760px), (pointer:coarse){
+    nav a, #themeBtn{padding:11px 12px}
+    .chip, .btn, .mini, .toc a, .jump a, .prog button{
+      min-height:40px; display:inline-flex; align-items:center; justify-content:center;
+    }
+    input[type=number], input[type=text]{min-height:40px}
+
+    /* Grow the slider to 36px and repaint the same 1px line with a centred
+       gradient, so the look is unchanged and only the grab area moves. */
+    input[type=range]{
+      height:36px;
+      background:linear-gradient(var(--line-2),var(--line-2)) center/100% 1px no-repeat;
+    }
+    input[type=range]::-webkit-slider-runnable-track{height:36px; background:transparent}
+
+    /* The 12px diamond is the design; the label around it carries the hit
+       area, so grow the label rather than the control. */
+    .check{padding:15px 0; min-height:44px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="brand" href="index.html"><i></i>PulseMask <small>Pulse Lab · Aurelius Dynamic</small></a>
+  <div class="wip">Prototype · work in progress</div>
+  <nav>
+    <a href="index.html#generator">Generator</a>
+    <a href="mission.html" aria-current="page">Mission</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="guide.html">Guide</a>
+    <a href="assembly.html">Assembly</a>
+    <a href="shader-lab.html">Shader Lab</a>
+    <a href="pricing.html">Pricing</a>
+    <button id="themeBtn" type="button">◐ Light</button>
+  </nav>
+</header>
+
+<div class="artband">
+  <b>Artwork</b>
+  <span>PulseMask is <strong>a design study sold as wearable art</strong> — a decorative prop.
+  It is not a respirator, not PPE, not a medical device, and it provides no protection of any
+  kind. Every performance figure on this site is <strong>modelled, never measured</strong>.</span>
+</div>
+
+<main>
+
+<section id="top">
+  <div class="eyebrow">Mission · why this exists</div>
+  <h1>An honest object about an unfinished idea.</h1>
+  <p class="lede">PulseMask began as a question: could a respirator be grown from a single
+  photograph of the person who has to wear it, and could a treatment stage small enough to sit on
+  a chin do anything real to the air passing through it?</p>
+  <p>Half of that question now has an answer. The other half does not, and this page is where
+  the split is written down rather than smoothed over.</p>
+
+  <p><strong>The geometry works.</strong> A browser tab takes a portrait and an interpupillary
+  distance and returns 30 named, closed, printable meshes in millimetres — shell, visor frame,
+  seal bead, inner cup, chin canister stack, valves, anchors, and a bronze-age armour layer over
+  the top. The same engine runs headless in Node and writes the identical file. Nothing is
+  sculpted by hand; every surface is a consequence of a parameter you can move.</p>
+
+  <p><strong>The air treatment does not.</strong> At the default build the UV-C reactor delivers
+  <span class="mono">0.22&nbsp;mJ/cm²</span> against a <span class="mono">3.0&nbsp;mJ/cm²</span>
+  target for two-log inactivation. That is <strong>7% of what it would need</strong>. The number
+  is printed on the front page, in the headless readout, and here, because a study that hides its
+  failing metric is decoration pretending to be research.</p>
+
+  <p>So PulseMask ships as what it honestly is today: <em>wearable art</em>, with the engineering
+  left visible inside it. You can buy the files, print the piece, wear it to a show, and read
+  every calculation that shaped it — including the one that does not close.</p>
+
+  <div class="toc">
+    <a href="#isnot">What it is &amp; is not</a>
+    <a href="#status">Where we are now</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#honesty">The honesty contract</a>
+    <a href="#studio">The studio</a>
+  </div>
+</section>
+
+<section id="isnot">
+  <div class="eyebrow">Scope · read this before anything else</div>
+  <h2>What PulseMask is, and what it is not</h2>
+  <p>Two lists. They are not marketing balance — the right-hand column is the legally and
+  physically operative one, and it wins every disagreement with anything else on this site.</p>
+
+  <div class="isnot">
+    <div class="yes">
+      <h3>What it is</h3>
+      <ul>
+        <li><b>A wearable-art object</b> — a costume, prop and display piece in respirator form.</li>
+        <li><b>A parametric geometry engine</b> that generates printable STL from a portrait.</li>
+        <li><b>A published design study</b>: the physics, the material choices and the failure
+          modes are all written down and linked.</li>
+        <li><b>A digital product</b> — you buy files and print them, or reserve a piece I print
+          and assemble by hand.</li>
+        <li><b>A real-time rendering exercise</b> — an in-browser 3D stage and a 34-design
+          <a href="shader-lab.html">Shader Lab</a>, both running WebGPU with TSL node
+          materials.</li>
+      </ul>
+    </div>
+    <div class="no">
+      <h3>What it is not</h3>
+      <ul>
+        <li><b>Not a respirator.</b> It provides no respiratory protection whatsoever.</li>
+        <li><b>Not PPE</b> and not personal protective equipment of any category.</li>
+        <li><b>Not a medical device</b>, not cleared or registered by any regulator anywhere.</li>
+        <li><b>Not tested</b> to NIOSH 42 CFR 84, EN 136, EN 143 or ISO 16900 — no protocol has
+          been run against it at all.</li>
+        <li><b>Not validated for fit.</b> A single photograph cannot recover metric depth. The
+          seal conforms by construction, which is a drawing, not a measurement.</li>
+        <li><b>Not electronics.</b> Horns, cells, PV arrays, LED rings and PZT elements are
+          solid sculpt — no cavities, no wire routes, no emitter seats.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="notice">
+    <b>Never install a UV-C emitter</b>
+    <p>UV-C is a serious eye and skin hazard. The reactor is drawn fully enclosed with no line of
+    sight to the wearer, and that geometry is the reason it can be drawn at all. Nothing sold
+    here contains, includes or supports emitters, drivers or batteries. If you illuminate a build,
+    use EL wire or visible LEDs only.</p>
+  </div>
+</section>
+
+<section id="status">
+  <div class="eyebrow">Current level · as of September 2026</div>
+  <h2>Exactly how far along this is</h2>
+  <p>Readiness on the standard nine-point technology scale. The software is further along than the
+  device, and quoting one number for both would flatter it — so here are two.</p>
+
+  <h3 style="margin-top:22px">The device — TRL 2</h3>
+  <div class="trl" aria-label="Device technology readiness level 2 of 9">
+    <div class="on">1</div><div class="here">2</div><div>3</div><div>4</div><div>5</div>
+    <div>6</div><div>7</div><div>8</div><div>9</div>
+  </div>
+  <p style="font-size:13px"><strong>Technology concept formulated.</strong> The architecture is
+  specified end to end and costed in physics, but no hardware has been built and no experiment has
+  been run. Nothing has passed TRL 3 because TRL 3 requires analytical or experimental proof of
+  the critical function — and the critical function here is germicidal dose, which currently
+  fails by a factor of fourteen.</p>
+
+  <h3 style="margin-top:24px">The generator — TRL 5</h3>
+  <div class="trl" aria-label="Generator technology readiness level 5 of 9">
+    <div class="on">1</div><div class="on">2</div><div class="on">3</div><div class="on">4</div>
+    <div class="here">5</div><div>6</div><div>7</div><div>8</div><div>9</div>
+  </div>
+  <p style="font-size:13px"><strong>Validated in a relevant environment.</strong> The engine runs
+  in two independent hosts — a browser and a headless Node process — and produces byte-identical
+  output from the same parameters. Files it writes load and slice. What holds it below TRL 6 is
+  the absence of an automated manifold validator: geometry is closed <em>by construction</em>,
+  not closed <em>by verification</em>.</p>
+
+  <hr>
+
+  <h3>The numbers, unrounded</h3>
+  <p>Straight from <span class="mono">node cli.mjs --metrics-only</span> at default parameters.
+  These are not marketing figures and they are not rounded in our favour.</p>
+
+  <div class="spec">
+    <div>
+      <div><div class="k">UV-C dose delivered</div>
+        <div class="kd">Against a 3.0 mJ/cm² target for 2-log inactivation. The open question of the entire project</div></div>
+      <div class="v bad">0.22 <small>mJ/cm² · 7% of target</small></div>
+    </div>
+    <div>
+      <div><div class="k">Log reduction, modelled</div>
+        <div class="kd">N/N₀ = e^(−k·D), k ≈ 1.2 cm²/mJ, enveloped RNA virus at 265–280 nm. Modelled, never measured</div></div>
+      <div class="v bad">0.11 <small>LRV · 17 LEDs · 27.6 ms dwell</small></div>
+    </div>
+    <div>
+      <div><div class="k">Geometry output</div>
+        <div class="kd">Named, individually closed meshes at default tessellation — what actually lands in your download</div></div>
+      <div class="v">30 <small>parts · 80.4k triangles</small></div>
+    </div>
+    <div>
+      <div><div class="k">Shell, printed</div>
+        <div class="kd">Solid volume at SLS PA12 density, 2.6 mm wall. Moves with wall thickness and process</div></div>
+      <div class="v">49 g <small>· 48.3 cm³</small></div>
+    </div>
+    <div>
+      <div><div class="k">Dead space</div>
+        <div class="kd">Analytic approximation of the cup envelope, not a mesh integration — flagged as an open issue</div></div>
+      <div class="v warn">40 <small>mL · approximate</small></div>
+    </div>
+    <div>
+      <div><div class="k">Seal bead compression</div>
+        <div class="kd">A design value. The bead conforms to the reconstructed face by construction — this is not fit validation</div></div>
+      <div class="v warn">0.80 <small>mm · by construction</small></div>
+    </div>
+    <div>
+      <div><div class="k">Solar harvest vs load</div>
+        <div class="kd">14 panels × 1.02 cm² at 22% in full sun, against UV-C LEDs at 35% wall-plug plus blower and MCU</div></div>
+      <div class="v warn">0.32 W <small>vs 1.48 W load</small></div>
+    </div>
+    <div>
+      <div><div class="k">Runtime, three cases</div>
+        <div class="kd">Continuous · with full sun · with the reactor gated to inhalation only. Duty-gating is the real lever</div></div>
+      <div class="v">3.5 / 4.5 / 14.8 <small>hours</small></div>
+    </div>
+  </div>
+
+  <p style="margin-top:18px; font-size:12.5px">Amber and red are not styling. They mark the
+  figures that are approximations or failures, and they stay that colour until the underlying work
+  is done — not until the copy is rewritten.</p>
+</section>
+
+<section id="roadmap">
+  <div class="eyebrow">Roadmap · seven phases</div>
+  <h2>What happens next, in order</h2>
+  <p>Phases are gated on evidence, not on time. Nothing moves to <em>complete</em> because a
+  quarter ended. Two run in parallel right now because they are independent: one asks whether the
+  thing fits, the other asks whether the thing works.</p>
+
+  <div class="rm">
+    <div>
+      <div class="ph">Phase 0</div>
+      <div class="nm">Concept &amp; geometry</div>
+      <div class="ds">Parametric shell, inner oronasal cup, canister architecture, the in-browser
+        generator, STL/OBJ/GLB export and the headless CLI. Done and shipping — it is what you can
+        use today.</div>
+      <div class="pill done">complete</div>
+    </div>
+    <div>
+      <div class="ph">Phase 1</div>
+      <div class="nm">Fit validation</div>
+      <div class="ds">Replace single-image inference with depth-scan capture. Print shells against
+        a landmark panel and pressure-map them with the PZT seal array. Until this closes,
+        every fit claim on this site stays a drawing.</div>
+      <div class="pill now">in progress</div>
+    </div>
+    <div>
+      <div class="ph">Phase 2</div>
+      <div class="nm">Dose budget</div>
+      <div class="ds">Folded labyrinth reactor and blower-decoupled flow, to attack the gap between
+        0.22 and 3.0 mJ/cm². Bench assay with surrogate phage. This is the phase that decides
+        whether the device half of PulseMask is ever more than art.</div>
+      <div class="pill now">in progress</div>
+    </div>
+    <div>
+      <div class="ph">Phase 3</div>
+      <div class="nm">PZT validation</div>
+      <div class="ds">Isolate the ultrasonic coalescence gain and test the capsid-disruption
+        hypothesis properly. If it does not hold up, it gets deleted from the design and from
+        this page — not quietly downgraded to a maybe.</div>
+      <div class="pill">planned</div>
+    </div>
+    <div>
+      <div class="ph">Phase 4</div>
+      <div class="nm">Safety &amp; interlocks</div>
+      <div class="ds">UV-C leakage survey, thermal envelope, CO₂ washout to an ISO 16900-style
+        protocol, battery abuse testing. No physical unit with emitters exists or will exist
+        before this phase.</div>
+      <div class="pill">planned</div>
+    </div>
+    <div>
+      <div class="ph">Phase 5</div>
+      <div class="nm">WebGPU / TSL renderer</div>
+      <div class="ds">Done. The generator and the Shader Lab both run WebGPURenderer with TSL
+        node materials, and all 34 surface designs were rewritten from GLSL. Visual parity held,
+        STL/OBJ/GLB exports are unaffected, and machines with no WebGPU adapter fall back to that
+        renderer's own WebGL2 backend rather than losing the page.</div>
+      <div class="pill done">complete</div>
+    </div>
+    <div>
+      <div class="ph">Phase 6</div>
+      <div class="nm">Regulatory path</div>
+      <div class="ds">Classification review and a pre-submission — only if Phases 2 and 3 produce
+        evidence worth submitting. Until that day, no protective claim is made anywhere, and the
+        product stays exactly what it says it is: art.</div>
+      <div class="pill">planned</div>
+    </div>
+  </div>
+
+  <div class="btnrow">
+    <a class="btn primary" href="pricing.html">See what you can buy today</a>
+    <a class="btn" href="index.html#generator">Open the generator</a>
+  </div>
+</section>
+
+<section id="honesty">
+  <div class="eyebrow">Method · how the work is kept straight</div>
+  <h2>The honesty contract</h2>
+  <p>A design study that flatters itself is worthless, and the failure mode is not dramatic — it
+  is one constant nudged to make a readout turn green. So the project runs under written rules
+  that apply to me and to every automated agent that touches the repository.</p>
+
+  <div class="cols">
+    <div class="card">
+      <h3>No metric improves by editing a constant</h3>
+      <p>The UV inactivation constant, the 55% LED coupling loss, the cell energy density, the
+      photovoltaic efficiency, the 2.22 face-width-to-IPD ratio and the 3.0 mJ/cm² dose target are
+      empirical or conventional values. If one is wrong it gets challenged with a citation. It
+      never gets edited to pass a check.</p>
+    </div>
+    <div class="card">
+      <h3>Modelled is labelled modelled</h3>
+      <p>Germicidal dose, log reduction, capsid disruption, coalescence gain, solar harvest and
+      runtime are all calculated from geometry and physics. None has been measured on a bench.
+      Every place a figure appears, that word appears with it.</p>
+    </div>
+    <div class="card">
+      <h3>Numbers are not rounded in our favour</h3>
+      <p><span class="mono">0.22 mJ/cm²</span> is the number. It is 7% of target and the site says
+      so in three places. Presentation rounding is how a study becomes a brochure.</p>
+    </div>
+    <div class="card">
+      <h3>Length alone does not buy dose</h3>
+      <p>For a uniformly lit tube, dose reduces to <span class="mono">P·η·ρ·r / 2Q</span> —
+      a longer reactor with the same emitters delivers the same dose. The interface therefore
+      exposes LED <em>density</em>, not count, so the physics cannot be gamed by dragging a
+      slider.</p>
+    </div>
+    <div class="card">
+      <h3>The disclaimer is load-bearing</h3>
+      <p>The work-in-progress badge, the artwork band at the top of every page and the
+      "modelled, not measured" language are structural. No automated change to them ships without
+      a human reading it first.</p>
+    </div>
+    <div class="card">
+      <h3>Fit is drawn, not proven</h3>
+      <p>The seal bead is placed at a fixed offset from the reconstructed face, so it conforms by
+      construction. That is a modelling decision. Real seal error comes from face-reconstruction
+      error and can only be measured against a scan — which is Phase 1.</p>
+    </div>
+  </div>
+
+  <p style="margin-top:20px; font-size:12.5px">These rules live in the repository as
+  <span class="mono">AGENT_PLAYBOOK.md §4</span> and are quoted verbatim into the instructions of
+  every agent that works on the code.</p>
+</section>
+
+<section id="studio">
+  <div class="eyebrow">Studio</div>
+  <h2>Who makes this</h2>
+  <p>PulseMask is a project of <strong>Aurelius Dynamic</strong>, a one-person studio working at
+  the seam between real-time graphics and industrial design. Pulse Lab is the hardware-shaped end
+  of it; the same geometry and shading tooling drives the studio's other work.</p>
+  <p>There is no team behind the "we" on this site, and there is no company standing behind a
+  warranty. That is precisely why the scope statement above is written as hard as it is: a sole
+  proprietor selling a decorative object has exactly one honest position, and this is it.</p>
+  <p>The site itself follows the same discipline as the product. No analytics, no cookies, no
+  tracking pixels, no backend, no account. Geometry is generated in your browser and never
+  uploaded. Ordering opens a pre-addressed email or a Stripe checkout — that is the whole
+  data pipeline.</p>
+
+  <div class="btnrow">
+    <a class="btn primary" href="pricing.html">Pricing &amp; files</a>
+    <a class="btn" href="mailto:build@aureliusdynamic.com">build@aureliusdynamic.com</a>
+    <a class="btn" href="guide.html">Print &amp; fit guide</a>
+    <a class="btn" href="assembly.html">Assembly walkthrough</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p><strong style="color:var(--mid)">Status:</strong> prototype / work in progress. PulseMask is a
+  design and engineering study by a sole proprietor, sold as wearable art. Nothing sold here is a
+  certified respirator, PPE or a medical device; nothing is tested to NIOSH 42 CFR 84, EN 136/143
+  or ISO 16900; no protective performance is claimed or implied. Germicidal and capsid-disruption
+  figures are modelled, not measured. UV-C is a serious eye and skin hazard and no emitters,
+  drivers or batteries are included or supported.</p>
+  <hr>
+  <p class="mono" style="font-size:10.5px">© 2026 Aurelius Dynamic · Pulse Lab ·
+  <a href="mailto:build@aureliusdynamic.com">build@aureliusdynamic.com</a> ·
+  <a href="index.html#generator">generator</a> · <a href="guide.html">guide</a> ·
+  <a href="assembly.html">assembly</a> · <a href="pricing.html">pricing</a> ·
+  no analytics, no cookies, no backend.</p>
+</footer>
+
+<script>
+  const THEME_KEY = 'pulsemask.theme';
+  function setTheme(t){
+    document.documentElement.dataset.theme = t;
+    document.getElementById('themeBtn').textContent = t === 'dark' ? '◐ Light' : '◑ Dark';
+    try { localStorage.setItem(THEME_KEY, t); } catch(e){}
+  }
+  document.getElementById('themeBtn').addEventListener('click', ()=>{
+    setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+  });
+  let saved = 'dark';
+  try { saved = localStorage.getItem(THEME_KEY) || 'dark'; } catch(e){}
+  setTheme(saved);
+</script>
+</body>
+</html>

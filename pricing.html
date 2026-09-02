@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing — PulseMask STL files, add-ons &amp; custom shaders · Aurelius Dynamic</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2307090A'/%3E%3Cpath d='M18 10h28v33L32 54 18 43z' fill='%236EFF3C'/%3E%3C/svg%3E">
+<script>/* apply the saved theme before first paint — prevents a dark flash for
+   light-theme visitors; the end-of-body script still owns the button */
+try{document.documentElement.dataset.theme=localStorage.getItem('pulsemask.theme')||'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --neon:#6EFF3C; --neon-2:#00E58A; --neon-ink:#0E8F35; --hz:#B57BFF;
+    --bg:#07090A; --bg-2:#0A0D0E; --panel:#0E1214; --panel-2:#131A1C;
+    --line:rgba(110,255,60,.14); --line-2:rgba(110,255,60,.30); --hair:rgba(255,255,255,.07);
+    --ink:#E6F2E4; --mid:#8FA394; --dim:#5A6B60;
+    --amber:#FFC24B; --good:#6EFF3C; --bad:#FF5C6E;
+    --glow:0 0 22px -6px var(--neon);
+    --grid:rgba(110,255,60,.045);
+    --bevel:polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 11px 100%, 0 calc(100% - 11px));
+  }
+  [data-theme="light"]{
+    --neon:#2FD41F; --neon-2:#00B36B; --neon-ink:#0B7A2C; --hz:#7A4FE0;
+    --bg:#EEF2EC; --bg-2:#F6F9F4; --panel:#FFFFFF; --panel-2:#F1F5EF;
+    --line:rgba(20,60,25,.16); --line-2:rgba(47,212,31,.55); --hair:rgba(20,40,25,.10);
+    --ink:#0C1410; --mid:#4A5A4E; --dim:#7C8C80;
+    --amber:#B87400; --good:#1B9E2A; --bad:#C8342F;
+    --glow:0 0 18px -8px rgba(47,212,31,.9);
+    --grid:rgba(20,60,25,.05);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:118px}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif; font-size:15px; line-height:1.55;
+    -webkit-font-smoothing:antialiased; text-wrap:pretty;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+                     linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:34px 34px;
+    transition:background-color .25s, color .25s;
+  }
+  a{color:var(--neon)} a:hover{color:var(--neon-2)}
+  a{text-decoration:none}
+  [data-theme="light"] a{color:var(--neon-ink)}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  .eyebrow{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--neon); opacity:.85}
+
+  header{
+    position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:16px;
+    padding:0 22px; height:56px; background:color-mix(in srgb, var(--bg) 86%, transparent);
+    -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--line);
+    box-shadow:0 1px 0 0 color-mix(in srgb, var(--neon) 22%, transparent);
+  }
+  .brand{display:flex; align-items:center; gap:9px; font-family:"Chakra Petch",sans-serif;
+    font-weight:700; font-size:17px; letter-spacing:.06em; text-transform:uppercase;
+    white-space:nowrap; flex:0 0 auto; color:var(--ink)}
+  .brand i{width:7px; height:16px; background:var(--neon); box-shadow:var(--glow);
+    display:block; clip-path:polygon(0 0,100% 0,100% 72%,50% 100%,0 72%)}
+  .brand small{font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.16em;
+    color:var(--dim); text-transform:uppercase; font-weight:400; padding-left:9px;
+    border-left:1px solid var(--hair); white-space:nowrap}
+  .wip{
+    font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--amber); border:1px solid color-mix(in srgb, var(--amber) 45%, transparent);
+    background:color-mix(in srgb, var(--amber) 10%, transparent);
+    padding:4px 10px; white-space:nowrap;
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+  }
+  nav{margin-left:auto; display:flex; gap:2px; align-items:center}
+  nav a{
+    font-family:"Chakra Petch",sans-serif; font-size:12.5px; font-weight:500; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--mid); padding:7px 12px; border:1px solid transparent;
+    white-space:nowrap;
+  }
+  nav a:hover{color:var(--ink); border-color:var(--line-2); box-shadow:var(--glow)}
+  [data-theme="light"] nav a{color:var(--mid)}
+  [data-theme="light"] nav a:hover{color:var(--ink)}
+  [data-theme="light"] .brand{color:var(--ink)}
+  [data-theme="light"] a.btn:not(.primary){color:var(--ink)}
+  nav a[aria-current="page"]{color:var(--neon); border-color:var(--line-2)}
+  #themeBtn{
+    margin-left:10px; font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.14em;
+    text-transform:uppercase; padding:7px 11px; background:transparent; cursor:pointer;
+    border:1px solid var(--line-2); color:var(--neon);
+    clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+  }
+  #themeBtn:hover{background:color-mix(in srgb, var(--neon) 12%, transparent); box-shadow:var(--glow)}
+
+  /* persistent artwork-status band — same component on every page */
+  .artband{
+    position:sticky; top:56px; z-index:49;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:9px 22px; font-family:"IBM Plex Mono",monospace; font-size:11px; line-height:1.45;
+    color:var(--amber);
+    background:color-mix(in srgb, var(--amber) 11%, var(--bg));
+    border-bottom:1px solid color-mix(in srgb, var(--amber) 40%, transparent);
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  }
+  .artband b{letter-spacing:.18em; text-transform:uppercase; font-weight:600; font-size:10px;
+    border:1px solid color-mix(in srgb, var(--amber) 50%, transparent); padding:3px 8px;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .artband span{color:var(--mid)}
+  .artband span strong{color:var(--amber); font-weight:600}
+  .artband a{color:var(--amber); text-decoration:underline; text-underline-offset:3px}
+
+  /* STASHED — styles for the physical founder run. The markup is pulled (see
+     docs/founder-run.stash.md); nothing on the page matches these selectors
+     today, so they render nothing. Kept so the section can be pasted straight
+     back once a piece has actually been built, timed and costed. */
+  .founder{
+    background:var(--panel); border:1px solid var(--line-2); box-shadow:var(--glow);
+    padding:26px 28px 22px; margin-top:22px; clip-path:var(--bevel); position:relative;
+    display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:30px;
+  }
+  .founder .tag{position:absolute; top:14px; right:14px; font-family:"IBM Plex Mono",monospace;
+    font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#04140A;
+    background:var(--neon); border:1px solid var(--neon); padding:3px 8px;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .founder h3{color:var(--neon); margin-bottom:2px; font-size:17px}
+  .founder .sub{font-size:12px; color:var(--dim); margin-bottom:14px}
+  .founder ul{list-style:none; margin:12px 0 18px; padding:0}
+  .founder li{font-size:13px; color:var(--mid); padding:6px 0 6px 20px; position:relative;
+    border-top:1px solid var(--hair)}
+  .founder li:first-child{border-top:0}
+  .founder li::before{content:'▸'; position:absolute; left:2px; color:var(--neon);
+    font-family:"IBM Plex Mono",monospace; font-size:11px}
+  .founder li b{color:var(--ink); font-weight:600}
+  .founder .aside{border-left:1px solid var(--line); padding-left:26px}
+  .founder .aside h4{font-family:"Chakra Petch",sans-serif; font-size:12px; font-weight:600;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--ink); margin:0 0 8px}
+  .founder .aside p{font-size:12.5px; margin:0 0 14px}
+  /* run counter */
+  .runbar{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin:0 0 18px}
+  .runbar > div{background:var(--panel-2); padding:11px 14px; display:flex;
+    justify-content:space-between; align-items:baseline; gap:12px}
+  .runbar .k{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--dim)}
+  .runbar .v{font-family:"IBM Plex Mono",monospace; font-size:13px; color:var(--neon)}
+
+  main{max-width:1180px; margin:0 auto}
+  section{padding:46px 40px; border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:0}
+  h1{font-family:"Chakra Petch",sans-serif; font-size:38px; line-height:1.08; letter-spacing:-.01em;
+    margin:12px 0 16px; font-weight:700; max-width:22ch; text-transform:uppercase}
+  h2{font-family:"Chakra Petch",sans-serif; font-size:23px; letter-spacing:.01em; margin:0 0 8px;
+    font-weight:600; text-transform:uppercase}
+  h3{font-family:"Chakra Petch",sans-serif; font-size:14.5px; margin:0 0 6px; font-weight:600;
+    letter-spacing:.04em; text-transform:uppercase}
+  p{margin:0 0 12px; color:var(--mid); max-width:66ch}
+  p strong{color:var(--ink); font-weight:600}
+  em{color:var(--neon); font-style:normal}
+  hr{border:0; border-top:1px solid var(--line); margin:26px 0}
+
+  .notice{
+    border:1px solid color-mix(in srgb, var(--amber) 45%, transparent);
+    background:color-mix(in srgb, var(--amber) 8%, transparent);
+    padding:16px 20px; margin:18px 0 0; clip-path:var(--bevel); max-width:900px;
+  }
+  .notice b{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--amber); display:block; margin-bottom:6px}
+  .notice p{font-size:12.5px; margin:0; max-width:none; color:var(--mid)}
+
+  .flash{
+    border:1px solid var(--line-2);
+    background:color-mix(in srgb, var(--neon) 7%, transparent);
+    padding:14px 18px; margin:18px 0 0; clip-path:var(--bevel); max-width:900px;
+  }
+  .flash b{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--neon); display:block; margin-bottom:6px}
+  .flash p{font-size:12.5px; margin:0; max-width:none; color:var(--mid)}
+  .off{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.08em;
+    color:var(--neon); border:1px solid var(--line-2); padding:2px 7px; margin-left:8px;
+    vertical-align:middle; white-space:nowrap;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+
+  .tiers{display:grid; grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr)); gap:16px; margin-top:22px}
+  .tier{background:var(--panel); border:1px solid var(--line); padding:24px 24px 20px;
+    clip-path:var(--bevel); position:relative; display:flex; flex-direction:column}
+  .tier.feature{border-color:var(--line-2); box-shadow:var(--glow)}
+  .tier .tag{position:absolute; top:14px; right:14px; font-family:"IBM Plex Mono",monospace;
+    font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--neon);
+    border:1px solid var(--line-2); padding:3px 8px;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .tier h3{color:var(--neon); margin-bottom:2px}
+  .tier .sub{font-size:12px; color:var(--dim); margin-bottom:14px}
+  .price{font-family:"IBM Plex Mono",monospace; font-size:34px; letter-spacing:-.02em;
+    color:var(--ink); margin:2px 0 4px}
+  .price span{font-size:12px; color:var(--dim); letter-spacing:.06em; margin-left:6px}
+  .tier ul{list-style:none; margin:12px 0 18px; padding:0; flex:1}
+  .tier li{font-size:13px; color:var(--mid); padding:6px 0 6px 20px; position:relative;
+    border-top:1px solid var(--hair)}
+  .tier li:first-child{border-top:0}
+  .tier li::before{content:'▸'; position:absolute; left:2px; color:var(--neon);
+    font-family:"IBM Plex Mono",monospace; font-size:11px}
+  .tier li b{color:var(--ink); font-weight:600}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    padding:12px 16px; border:1px solid var(--line-2); background:transparent; color:var(--ink);
+    cursor:pointer; width:100%;
+    clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+  }
+  .btn:hover{background:color-mix(in srgb, var(--neon) 10%, transparent); box-shadow:var(--glow); color:var(--ink)}
+  .btn.primary{background:var(--neon); border-color:var(--neon); color:#04140A; font-weight:600;
+    box-shadow:var(--glow)}
+  .btn.primary:hover{background:var(--neon-2); border-color:var(--neon-2); color:#04140A}
+
+  .addons{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:20px}
+  .addons > div{background:var(--panel); padding:16px 20px; display:grid;
+    grid-template-columns:1fr auto auto; gap:18px; align-items:center}
+  .addons > div:hover{background:var(--panel-2)}
+  .addons .nm{font-family:"Chakra Petch",sans-serif; font-size:13.5px; font-weight:600;
+    letter-spacing:.03em; text-transform:uppercase}
+  .addons .ds{font-size:12px; color:var(--dim); margin-top:2px}
+  .addons .pr{font-family:"IBM Plex Mono",monospace; font-size:18px; color:var(--neon); white-space:nowrap}
+  .addons .pr small{font-size:10px; color:var(--dim); letter-spacing:.06em}
+  .addons a.mini{font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.12em;
+    text-transform:uppercase; border:1px solid var(--line); color:var(--mid); padding:6px 10px;
+    white-space:nowrap;
+    clip-path:polygon(0 0,calc(100% - 5px) 0,100% 5px,100% 100%,5px 100%,0 calc(100% - 5px))}
+  .addons a.mini:hover{color:var(--ink); border-color:var(--line-2); box-shadow:var(--glow)}
+  .addons > div.bundle{border-top:1px solid var(--line-2)}
+  .addons > div.bundle .nm{color:var(--neon)}
+
+  .faq{margin-top:20px; max-width:900px}
+  .faq > div{border-top:1px solid var(--hair); padding:15px 0}
+  .faq > div:first-child{border-top:0; padding-top:4px}
+  .faq h3{color:var(--neon); margin-bottom:6px}
+  .faq p{font-size:13px; margin:0; max-width:none}
+
+  .cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:24px}
+  .card{background:var(--panel); border:1px solid var(--line); padding:20px 22px; margin:0 0 16px;
+    clip-path:var(--bevel); position:relative}
+  .card h3{margin-bottom:12px; color:var(--neon)}
+  .card p{font-size:13px; max-width:none}
+
+  footer{padding:36px 40px 64px; color:var(--dim); font-size:12px; max-width:1180px; margin:0 auto}
+  footer p{color:var(--dim); font-size:12px; max-width:76ch}
+
+  @media (max-width:1340px){ .brand small{display:none} }
+  @media (max-width:1410px){ nav a{padding:7px 8px; font-size:11.5px} .wip{font-size:9px; padding:4px 7px} }
+  @media (max-width:1080px){
+    section{padding:34px 22px} h1{font-size:30px}
+    header{flex-wrap:wrap; height:auto; min-height:56px; padding:8px 14px; row-gap:4px}
+    nav{flex-wrap:wrap; justify-content:flex-end}
+    .artband{position:static}
+    html{scroll-padding-top:64px}
+    .founder{grid-template-columns:minmax(0,1fr); gap:22px}
+    .founder .aside{border-left:0; border-top:1px solid var(--line); padding-left:0; padding-top:22px}
+  }
+  @media (max-width:760px){
+    .addons > div{grid-template-columns:1fr auto}
+    .addons a.mini{grid-column:1 / -1; justify-self:start}
+  }
+
+  /* ── Touch & small-screen pass ────────────────────────────────────────────
+     Measured, not guessed. At 390px wide the chips, mini-buttons, theme
+     toggle and number inputs all came in under 32px tall, the slider's hit
+     box was its 1px track, and the 7-link nav wrapped to three rows — 117px
+     of header on a phone, 181px at 320px.
+
+     Two separate concerns, so two separate queries.
+
+     Layout is about width: below 760px the nav stops wrapping, takes its own
+     full-width row and scrolls sideways, which buys back a third of the
+     header. */
+  @media (max-width:760px){
+    nav{
+      flex:1 1 100%; margin-left:0; flex-wrap:nowrap; justify-content:flex-start;
+      overflow-x:auto; overscroll-behavior-x:contain;
+      scrollbar-width:none; -ms-overflow-style:none;
+    }
+    nav::-webkit-scrollbar{display:none}
+    nav a{flex:0 0 auto}
+    #themeBtn{flex:0 0 auto; margin-left:6px}
+  }
+
+  /* Target size is about the pointer, not the width — an iPad in portrait is
+     768px and still a thumb. pointer:coarse catches every touch device at any
+     size; the width clause keeps a narrow desktop window honest too.
+     40px floor: WCAG 2.5.8 asks 24px, but 40 is the comfortable floor for a
+     thumb and these are bevelled boxes with room to grow. Inline prose links
+     are deliberately untouched — they are exempt from the rule, and padding
+     them would wreck the line rhythm. */
+  @media (max-width:760px), (pointer:coarse){
+    nav a, #themeBtn{padding:11px 12px}
+    .chip, .btn, .mini, .toc a, .jump a, .prog button{
+      min-height:40px; display:inline-flex; align-items:center; justify-content:center;
+    }
+    input[type=number], input[type=text]{min-height:40px}
+
+    /* Grow the slider to 36px and repaint the same 1px line with a centred
+       gradient, so the look is unchanged and only the grab area moves. */
+    input[type=range]{
+      height:36px;
+      background:linear-gradient(var(--line-2),var(--line-2)) center/100% 1px no-repeat;
+    }
+    input[type=range]::-webkit-slider-runnable-track{height:36px; background:transparent}
+
+    /* The 12px diamond is the design; the label around it carries the hit
+       area, so grow the label rather than the control. */
+    .check{padding:15px 0; min-height:44px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="brand" href="index.html" style="text-decoration:none"><i></i>PulseMask <small>Pulse Lab · Aurelius Dynamic</small></a>
+  <div class="wip">Prototype · work in progress</div>
+  <nav>
+    <a href="index.html#generator">Generator</a>
+    <a href="mission.html">Mission</a>
+    <a href="index.html#roadmap">Roadmap</a>
+    <a href="guide.html">Guide</a>
+    <a href="assembly.html">Assembly</a>
+    <a href="shader-lab.html">Shader Lab</a>
+    <a href="pricing.html" aria-current="page">Pricing</a>
+    <button id="themeBtn" type="button">◐ Light</button>
+  </nav>
+</header>
+
+<div class="artband">
+  <b>Artwork</b>
+  <span>Everything on this page is <strong>a decorative wearable-art piece or the files to make
+  one</strong>. Not a respirator, not PPE, not a medical device; no protection of any kind, no
+  electronics included or supported. <a href="mission.html#isnot">Full scope statement</a></span>
+</div>
+
+<main>
+
+<section id="top">
+  <div class="eyebrow">Pricing · digital files only</div>
+  <h1>Own the prototype. Print it yourself.</h1>
+  <p>Everything sold here is a <strong>digital file</strong> — printable STL geometry, shader
+  modules, and custom finish specs from the <a href="shader-lab.html">Shader Lab</a>. Nothing
+  physical ships, nothing here contains electronics, and one line matters more than any price
+  on this page:</p>
+
+  <div class="notice">
+    <b>Read before ordering</b>
+    <p><strong style="color:var(--amber)">PulseMask is a design study, sold as wearable art.</strong>
+    These files produce a decorative prop / costume / maker piece. It is <strong>not a
+    respirator, not PPE, and not a medical device</strong> — it is untested to NIOSH 42 CFR 84,
+    EN 136/143 and ISO 16900, provides no respiratory protection, and must never be relied on as
+    protective equipment. UV-C hardware is an eye and skin hazard; no electronics are included or
+    supported. Every order confirms this in writing.</p>
+  </div>
+
+  <div class="flash">
+    <b>Launch sale · first season</b>
+    <p>To get PulseMask out into the world, select items are <strong>up to 75% off</strong>
+    while the launch window runs — struck-through prices are the standing list prices they
+    return to. The price you order at is the price you pay. No countdown clocks; when the
+    window closes, it closes.</p>
+  </div>
+</section>
+
+<section id="tiers">
+  <div class="eyebrow">STL files</div>
+  <h2>The mask</h2>
+  <p>All tiers export the full multi-part model in millimetres — shell, wraparound visor frame,
+  inner oronasal cup, seal bead, chin canister stack, exhale valves and strap anchors — each part
+  a named, closed mesh, ready to slice.</p>
+
+  <div class="tiers">
+    <div class="tier">
+      <h3>Stock Fit</h3>
+      <div class="sub">Anthropometric standard sizes</div>
+      <div class="price">$9<span>USD</span><span class="was">list $19</span><span class="off">−53%</span></div>
+      <ul>
+        <li><b>Full mask STL set</b> in S / M / L stock fits</li>
+        <li>All core parts, individually printable</li>
+        <li><a href="guide.html">Print guide</a> — SLS PA12 + FDM notes, visor cut template</li>
+        <li>Personal-use license, unlimited personal prints</li>
+        <li>Delivered by email within 48 h</li>
+      </ul>
+      <a class="btn" data-stripe="stockFit" href="mailto:build@aureliusdynamic.com?subject=PulseMask%20order%20%E2%80%94%20Stock%20Fit%20STL%20(%249%20launch%20sale)&body=Order%3A%20Stock%20Fit%20STL%20%E2%80%94%20%249%20(launch%20sale%2C%20list%20%2419)%0ASize%20(S%2FM%2FL)%3A%20%0AAdd-ons%20(optional)%3A%20%0AFinish%20spec%20code%20(optional%2C%20from%20the%20Shader%20Lab)%3A%20%0A%0AI%20understand%20this%20is%20a%20decorative%20prop%20%2F%20wearable-art%20file%2C%20not%20PPE%2C%20not%20a%20respirator%2C%20and%20provides%20no%20protection.%0A%0AName%3A%20">Order stock fit</a>
+    </div>
+
+    <div class="tier feature">
+      <div class="tag">Recommended</div>
+      <h3>Photo-Fit</h3>
+      <div class="sub">Generated from your portrait</div>
+      <div class="price">$49<span>USD</span><span class="was">list $79</span><span class="off">−38%</span></div>
+      <ul>
+        <li><b>Fitted to your face</b> from one portrait + your IPD in mm</li>
+        <li>Everything in Stock Fit, generated at your measurements</li>
+        <li>Reconstructed face-form bust STL included</li>
+        <li>One revision round included</li>
+        <li>Turnaround ≤ 5 days</li>
+      </ul>
+      <a class="btn primary" data-stripe="photoFit" href="mailto:build@aureliusdynamic.com?subject=PulseMask%20order%20%E2%80%94%20Photo-Fit%20STL%20(%2449%20launch%20sale)&body=Order%3A%20Photo-Fit%20STL%20%E2%80%94%20%2449%20(launch%20sale%2C%20list%20%2479)%0AInterpupillary%20distance%20(mm)%3A%20%0APortrait%3A%20attach%20a%20front-facing%2C%20evenly%20lit%20photo%2C%20both%20pupils%20visible%2C%20no%20glasses%0AAdd-ons%20(optional)%3A%20%0AFinish%20spec%20code%20(optional%2C%20from%20the%20Shader%20Lab)%3A%20%0A%0AI%20understand%20this%20is%20a%20decorative%20prop%20%2F%20wearable-art%20file%2C%20not%20PPE%2C%20not%20a%20respirator%2C%20and%20provides%20no%20protection.%0A%0AName%3A%20">Order photo-fit</a>
+    </div>
+
+    <div class="tier">
+      <h3>Full Custom</h3>
+      <div class="sub">Photo-fit + every add-on + finish</div>
+      <div class="price">$79<span>USD</span><span class="was">list $139</span><span class="off">−43%</span></div>
+      <ul>
+        <li><b>Photo-Fit</b> plus the complete Galea add-on set</li>
+        <li>Scale hood · solar horns · crest keel · EL-wire routing</li>
+        <li>Custom finish session — your Shader Lab spec + render pack</li>
+        <li>Two revision rounds, priority queue</li>
+        <li>Turnaround ≤ 7 days</li>
+      </ul>
+      <a class="btn" data-stripe="fullCustom" href="mailto:build@aureliusdynamic.com?subject=PulseMask%20order%20%E2%80%94%20Full%20Custom%20(%2479%20launch%20sale)&body=Order%3A%20Full%20Custom%20%E2%80%94%20%2479%20(launch%20sale%2C%20list%20%24139)%0AInterpupillary%20distance%20(mm)%3A%20%0APortrait%3A%20attach%20a%20front-facing%2C%20evenly%20lit%20photo%2C%20both%20pupils%20visible%2C%20no%20glasses%0AFinish%20spec%20code%20(from%20the%20Shader%20Lab%2C%20or%20write%20%22design%20one%20with%20me%22)%3A%20%0A%0AI%20understand%20this%20is%20a%20decorative%20prop%20%2F%20wearable-art%20file%2C%20not%20PPE%2C%20not%20a%20respirator%2C%20and%20provides%20no%20protection.%0A%0AName%3A%20">Order full custom</a>
+    </div>
+  </div>
+</section>
+
+<section id="addons">
+  <div class="eyebrow">Add-ons</div>
+  <h2>Galea layer &amp; extras</h2>
+  <p>À-la-carte STL modules that bolt onto any tier — the bronze-age armour language on top of
+  the technical shell. Cosmetic parts: the horns, cells and PV arrays are sculpt, not
+  electronics.</p>
+
+  <div class="addons">
+    <div>
+      <div><div class="nm">Dragon scale hood</div>
+        <div class="ds">Overlapping lorica squamata plate field across the crown, opens cleanly around the visor</div></div>
+      <div class="pr">$12</div>
+      <a class="mini" aria-label="Add Dragon scale hood, $12" href="mailto:build@aureliusdynamic.com?subject=PulseMask%20add-on%20%E2%80%94%20Dragon%20scale%20hood%20(%2412)&body=Add-on%3A%20Dragon%20scale%20hood%20%E2%80%94%20%2412%0AAdd%20to%20order%20%2F%20tier%3A%20%0A%0AI%20understand%20these%20are%20decorative%20prop%20files%2C%20not%20PPE.%0A%0AName%3A%20">Add</a>
+    </div>
+    <div>
+      <div><div class="nm">Solar horns + PV array</div>
+        <div class="ds">Tapered temple horns with panel seats and pouch-cell cavities — cosmetic sculpt</div></div>
+      <div class="pr">$12</div>
+      <a class="mini" aria-label="Add Solar horns + PV array, $12" href="mailto:build@aureliusdynamic.com?subject=PulseMask%20add-on%20%E2%80%94%20Solar%20horns%20(%2412)&body=Add-on%3A%20Solar%20horns%20%2B%20PV%20array%20%E2%80%94%20%2412%0AAdd%20to%20order%20%2F%20tier%3A%20%0A%0AI%20understand%20these%20are%20decorative%20prop%20files%2C%20not%20PPE.%0A%0AName%3A%20">Add</a>
+    </div>
+    <div>
+      <div><div class="nm">Crest keel + antenna</div>
+        <div class="ds">Centreline crown ridge with the nine-element copper meander detail</div></div>
+      <div class="pr">$8</div>
+      <a class="mini" aria-label="Add Crest keel + antenna, $8" href="mailto:build@aureliusdynamic.com?subject=PulseMask%20add-on%20%E2%80%94%20Crest%20keel%20(%248)&body=Add-on%3A%20Crest%20keel%20%2B%20antenna%20%E2%80%94%20%248%0AAdd%20to%20order%20%2F%20tier%3A%20%0A%0AI%20understand%20these%20are%20decorative%20prop%20files%2C%20not%20PPE.%0A%0AName%3A%20">Add</a>
+    </div>
+    <div>
+      <div><div class="nm">EL-wire channel routing</div>
+        <div class="ds">Swept wire channels along every armour seam, visor arc and collar ring — for 2–3 mm EL wire</div></div>
+      <div class="pr">$10</div>
+      <a class="mini" aria-label="Add EL-wire channel routing, $10" href="mailto:build@aureliusdynamic.com?subject=PulseMask%20add-on%20%E2%80%94%20EL-wire%20routing%20(%2410)&body=Add-on%3A%20EL-wire%20channel%20routing%20%E2%80%94%20%2410%0AAdd%20to%20order%20%2F%20tier%3A%20%0A%0AI%20understand%20these%20are%20decorative%20prop%20files%2C%20not%20PPE.%0A%0AName%3A%20">Add</a>
+    </div>
+    <div>
+      <div><div class="nm">Face-form bust</div>
+        <div class="ds">Your reconstructed face surface as a display / test-fit bust (included with Photo-Fit)</div></div>
+      <div class="pr">$9</div>
+      <a class="mini" aria-label="Add Face-form bust, $9" href="mailto:build@aureliusdynamic.com?subject=PulseMask%20add-on%20%E2%80%94%20Face-form%20bust%20(%249)&body=Add-on%3A%20Face-form%20bust%20%E2%80%94%20%249%0AAdd%20to%20order%20%2F%20tier%3A%20%0A%0AI%20understand%20these%20are%20decorative%20prop%20files%2C%20not%20PPE.%0A%0AName%3A%20">Add</a>
+    </div>
+    <div class="bundle">
+      <div><div class="nm">Full Galea bundle</div>
+        <div class="ds">Scale hood + horns + crest + EL-wire routing together — save $13</div></div>
+      <div class="pr">$29 <small>· save $13</small></div>
+      <a class="mini" aria-label="Add Full Galea bundle, $29" href="mailto:build@aureliusdynamic.com?subject=PulseMask%20add-on%20%E2%80%94%20Full%20Galea%20bundle%20(%2429)&body=Add-on%3A%20Full%20Galea%20bundle%20%E2%80%94%20%2429%0AAdd%20to%20order%20%2F%20tier%3A%20%0A%0AI%20understand%20these%20are%20decorative%20prop%20files%2C%20not%20PPE.%0A%0AName%3A%20">Add</a>
+    </div>
+  </div>
+</section>
+
+<section id="shaders">
+  <div class="eyebrow">Shaders &amp; components</div>
+  <h2>Custom finishes &amp; code</h2>
+  <p>The <a href="shader-lab.html">Shader Lab</a> is free to use — design a finish, copy the spec
+  code, attach it to any order. What costs money is the work built from it, and the source
+  itself if you are a developer.</p>
+
+  <div class="addons">
+    <div>
+      <div><div class="nm">Finish spec + render pack</div>
+        <div class="ds">Your Shader Lab spec applied to the full model — turntable renders, colour + paint reference sheet</div></div>
+      <div class="pr">$12 <small>· list $24</small></div>
+      <a class="mini" href="shader-lab.html">Design one</a>
+    </div>
+    <div>
+      <div><div class="nm">Shader module — single</div>
+        <div class="ds">One commented GLSL module from the 34-design roster (voronoi shatter, tiger stripe, magma flow, ripple tank…) — single-project license</div></div>
+      <div class="pr">$5 <small>· list $19</small></div>
+      <a class="mini" data-stripe="shaderSingle" aria-label="Order Shader module — single, $5 launch sale" href="mailto:build@aureliusdynamic.com?subject=PulseMask%20shader%20module%20%E2%80%94%20single%20(%245%20launch%20sale)&body=Order%3A%20Shader%20module%2C%20single%20%E2%80%94%20%245%20(launch%20sale%2C%20list%20%2419)%0AModule%3A%20%0AProject%20it%20will%20ship%20in%3A%20%0A%0AName%3A%20">Order</a>
+    </div>
+    <div>
+      <div><div class="nm">Shader five-pack</div>
+        <div class="ds">Five lab modules of your choice from the 34-design roster — single-project license</div></div>
+      <div class="pr">$25 <small>· list $49</small></div>
+      <a class="mini" data-stripe="shaderFive" aria-label="Order Shader five-pack, $25 launch sale" href="mailto:build@aureliusdynamic.com?subject=PulseMask%20shader%20five-pack%20(%2425%20launch%20sale)&body=Order%3A%20Shader%20five-pack%20%E2%80%94%20%2425%20(launch%20sale%2C%20list%20%2449)%0AProject%20it%20will%20ship%20in%3A%20%0A%0AName%3A%20">Order</a>
+    </div>
+    <div>
+      <div><div class="nm">Custom shader / component commission</div>
+        <div class="ds">A material, effect or three.js component built to your brief, delivered with source and a demo page</div></div>
+      <div class="pr">from $149</div>
+      <a class="mini" href="mailto:build@aureliusdynamic.com?subject=Commission%20inquiry%20%E2%80%94%20custom%20shader%20%2F%20component&body=Brief%20(what%2C%20where%20it%20runs%2C%20deadline)%3A%0A%0ABudget%20range%3A%0A%0AName%3A%20">Inquire</a>
+    </div>
+  </div>
+
+  <p style="margin-top:16px; font-size:12.5px">Developer licenses cover one shipped project each,
+  source included, no redistribution or resale of the source itself. Need broader terms? Ask —
+  studio licensing is a conversation, not a form.</p>
+</section>
+
+<section id="how">
+  <div class="eyebrow">How ordering works</div>
+  <h2>No cart. No tracking. Email.</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>01 · Order</h3>
+      <p>Every order button opens a pre-addressed email draft with the tier, the price and the
+      details I need already filled in. Add your answers and send it. For Photo-Fit, attach your
+      portrait and your IPD in the same message. Nothing about you touches this page — there is
+      no cart, no account, no analytics, no cookies and no backend here.</p>
+    </div>
+    <div class="card">
+      <h3>02 · Confirm &amp; pay</h3>
+      <p>You get a written confirmation of scope, price and turnaround, with an invoice and a
+      payment link. Work starts when payment clears. If a Photo-Fit portrait is unusable —
+      lighting, angle, glasses — you hear that straight away, and you get a full refund if it
+      cannot be made to work.</p>
+    </div>
+    <div class="card">
+      <h3>03 · Delivery</h3>
+      <p>Files arrive by email — STL in millimetres, ready to slice, plus the
+      <a href="guide.html">print guide</a>, the
+      <a href="assembly.html">assembly walkthrough</a> and
+      your <span class="mono">PMK-</span> unlock code for in-browser exports on the
+      <a href="index.html#generator">generator</a>. Revision rounds per your tier. If generation
+      fails on our side, full refund; digital files otherwise carry no returns, which is why
+      revisions exist.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2 style="margin-top:6px">Fine print</h2>
+  <div class="cols">
+    <div>
+      <h3>License</h3>
+      <p>Personal license on every STL tier: print as many as you like for yourself, gift prints
+      freely, never redistribute or resell the files, never sell prints. Selling prints requires
+      a commercial print license — flat 5× the <em>list</em> tier price (not the sale price),
+      per design, forever. Email to arrange.</p>
+    </div>
+    <div>
+      <h3>What you print is on you</h3>
+      <p>Files are provided as-is for decorative use. You are responsible for material choice,
+      print quality and how a finished piece is worn. Keep the visor aperture edges and any
+      line-of-sight rules from the design intact if you light it — and never install a UV-C
+      emitter. That constraint is not negotiable at any price.</p>
+    </div>
+    <div>
+      <h3>Why these prices</h3>
+      <p>Stock files are priced like a good prop STL, because that is what they are. Photo-Fit
+      costs more because a human generates, checks and revises a mesh that only fits one face on
+      Earth. Commissions are priced like the engineering work they contain.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p><strong style="color:var(--mid)">Status:</strong> prototype / work in progress. PulseMask is a
+  design and engineering study by a sole proprietor, <strong style="color:var(--amber)">sold as
+  wearable art</strong>. Products on this page are digital files for decorative and educational
+  use. Nothing sold here is a certified respirator, PPE or a medical device; nothing is tested to NIOSH 42 CFR 84, EN 136/143 or ISO 16900; no protective
+  performance is claimed or implied; and nothing sold here provides protection of any kind.
+  Germicidal and capsid-disruption figures on the main page are modelled, not measured. No
+  emitters, drivers or batteries are included or supported.</p>
+  <hr>
+  <p class="mono" style="font-size:10.5px">© 2026 Aurelius Dynamic · Pulse Lab ·
+  <a href="mailto:build@aureliusdynamic.com">build@aureliusdynamic.com</a> · prices in USD ·
+  <a href="mission.html">mission</a> · <a href="guide.html">guide</a> ·
+  <a href="assembly.html">assembly</a> ·
+  no analytics, no cookies, no backend on this page.</p>
+</footer>
+
+<script>
+  /* ---- Card checkout: dormant on purpose ----
+     Every entry is empty, so every button keeps its mailto draft and orders run
+     on email + invoice. That is deliberate — a processor takes a cut per sale,
+     and email costs nothing while there is no revenue to take a cut from.
+
+     The hook stays because it costs nothing to leave in. When card checkout is
+     worth its fee, paste live Payment Link URLs here (Stripe dashboard →
+     Products → Payment links) and those buttons switch over on the next load;
+     any left empty stay on mailto. Checkout would happen off-site either way —
+     this page stays backend-free and collects nothing itself. */
+  const STRIPE_LINKS = {
+    stockFit:     '',
+    photoFit:     '',
+    fullCustom:   '',
+    shaderSingle: '',
+    shaderFive:   ''
+  };
+  for (const [k, url] of Object.entries(STRIPE_LINKS)){
+    if (!url) continue;
+    const a = document.querySelector('[data-stripe="' + k + '"]');
+    if (a){ a.href = url; a.target = '_blank'; a.rel = 'noopener'; }
+  }
+
+  const THEME_KEY = 'pulsemask.theme';
+  function setTheme(t){
+    document.documentElement.dataset.theme = t;
+    document.getElementById('themeBtn').textContent = t === 'dark' ? '◐ Light' : '◑ Dark';
+    try { localStorage.setItem(THEME_KEY, t); } catch(e){}
+  }
+  document.getElementById('themeBtn').addEventListener('click', ()=>{
+    setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+  });
+  let saved = 'dark';
+  try { saved = localStorage.getItem(THEME_KEY) || 'dark'; } catch(e){}
+  setTheme(saved);
+</script>
+</body>
+</html>
