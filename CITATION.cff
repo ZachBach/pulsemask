@@ -16,8 +16,8 @@ authors:
     affiliation: "Aurelius Dynamic"
     email: build@aureliusdynamic.com
 
-repository-code: "https://github.com/ZachBach/helixPulse"
-url: "https://github.com/ZachBach/helixPulse"
+repository-code: "https://github.com/ZachBach/pulsemask"
+url: "https://github.com/ZachBach/pulsemask"
 abstract: >-
   A browser-based parametric generator that produces printable, watertight
   respirator-form geometry from a single portrait photograph and an
