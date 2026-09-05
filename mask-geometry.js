@@ -272,6 +272,83 @@
     };
   }
 
+  /* Make every face in a part agree on which way is out.
+
+     Why this exists: the shell's aperture walls used to pick their winding with
+     a heuristic — is my normal pointing away from the hole centre — which is
+     unreliable wherever a wall runs nearly tangential to that direction. About
+     30 of them came out backwards, and a backwards quad duplicates its
+     neighbours' directed edges instead of opposing them, so it shows up as
+     equal numbers of duplicate and boundary edges in the same place. That is
+     exactly what the validator reported for shell_outer: 120 and 120.
+
+     Topology decides it here instead of geometry. Two faces sharing an edge
+     agree iff they traverse that edge in OPPOSITE directions; breadth-first
+     from one seed face propagates that rule across the whole surface. A final
+     signed-volume check flips the entire part if the seed happened to be
+     inward. Operates on the raw Part before finalize() splits vertices. */
+  function orientPart(part, tol) {
+    tol = tol || 1e-7;
+    var pos = part.pos, idx = part.idx, inv = 1 / tol, i;
+    var nv = pos.length / 3, weld = new Int32Array(nv), map = new Map(), wn = 0;
+    for (i = 0; i < nv; i++) {
+      var k = Math.round(pos[i*3]*inv) + ',' + Math.round(pos[i*3+1]*inv) + ',' + Math.round(pos[i*3+2]*inv);
+      var w = map.get(k);
+      if (w === undefined) { w = wn++; map.set(k, w); }
+      weld[i] = w;
+    }
+    var nf = idx.length / 3, S = wn + 1;
+    /* undirected edge -> the faces on it */
+    var inc = new Map(), f, e;
+    for (f = 0; f < nf; f++) {
+      var a = weld[idx[f*3]], b = weld[idx[f*3+1]], c = weld[idx[f*3+2]];
+      if (a === b || b === c || a === c) continue;
+      var tri = [[a,b],[b,c],[c,a]];
+      for (e = 0; e < 3; e++) {
+        var u = tri[e][0], v = tri[e][1], ek = (u < v ? u * S + v : v * S + u);
+        var lst = inc.get(ek); if (!lst) { lst = []; inc.set(ek, lst); }
+        lst.push(f);
+      }
+    }
+    var seen = new Uint8Array(nf), queue = [0], flipped = 0;
+    seen[0] = 1;
+    var dirOf = function (fi, u, v) {   /* does face fi traverse u->v ? */
+      var A = weld[idx[fi*3]], B = weld[idx[fi*3+1]], C = weld[idx[fi*3+2]];
+      return (A === u && B === v) || (B === u && C === v) || (C === u && A === v);
+    };
+    while (queue.length) {
+      var cur = queue.pop();
+      var ca = weld[idx[cur*3]], cb = weld[idx[cur*3+1]], cc = weld[idx[cur*3+2]];
+      var ctri = [[ca,cb],[cb,cc],[cc,ca]];
+      for (e = 0; e < 3; e++) {
+        var eu = ctri[e][0], ev = ctri[e][1];
+        var lst2 = inc.get(eu < ev ? eu * S + ev : ev * S + eu) || [];
+        for (i = 0; i < lst2.length; i++) {
+          var nb = lst2[i];
+          if (nb === cur || seen[nb]) continue;
+          /* agree = neighbour walks this edge the other way round */
+          if (dirOf(nb, eu, ev)) {          /* same direction -> disagree, flip */
+            var t = idx[nb*3+1]; idx[nb*3+1] = idx[nb*3+2]; idx[nb*3+2] = t;
+            flipped++;
+          }
+          seen[nb] = 1; queue.push(nb);
+        }
+      }
+    }
+    var vol = 0;
+    for (f = 0; f < nf; f++) {
+      var p0 = idx[f*3]*3, p1 = idx[f*3+1]*3, p2 = idx[f*3+2]*3;
+      vol += (pos[p0] * (pos[p1+1]*pos[p2+2] - pos[p1+2]*pos[p2+1])
+            - pos[p0+1] * (pos[p1]*pos[p2+2] - pos[p1+2]*pos[p2])
+            + pos[p0+2] * (pos[p1]*pos[p2+1] - pos[p1+1]*pos[p2])) / 6;
+    }
+    if (vol < 0) {
+      for (f = 0; f < nf; f++) { var t2 = idx[f*3+1]; idx[f*3+1] = idx[f*3+2]; idx[f*3+2] = t2; }
+      flipped = nf - flipped;
+    }
+    return flipped;
+  }
+
   function volumeOf(part) {
     var v = 0, pos = part.pos, idx = part.idx;
     for (var f = 0; f < idx.length; f += 3) {
@@ -521,6 +598,10 @@
       }
     }
     for (j = 0; j < nT; j++) shell.quad(O(nS, j), I(nS, j), I(nS, j + 1), O(nS, j + 1));
+    /* wallQuad above picks its winding from a hole-centre heuristic that is
+       unreliable on tangential segments; roughly 30 quads came out reversed.
+       Settle it topologically instead of trying to out-guess the geometry. */
+    orientPart(shell);
     parts.push(shell);
 
     /* --- wraparound visor lens --- */
@@ -633,7 +714,14 @@
         var cnb = [[i - 1, j], [i + 1, j], [i, j - 1], [i, j + 1]];
         for (var d2 = 0; d2 < 4; d2++) {
           var ci = cnb[d2][0], cj = ((cnb[d2][1] % cT) + cT) % cT;
-          if (!(ci < 0 || ci >= cS ? true : cKept[ci][cj])) continue;
+          /* Out-of-range neighbours used to count as "kept", so a dropped cell
+             on the bottom row emitted a rim wall — and the loop below already
+             emits a rim quad for every j, unconditionally. Two coincident quads
+             on the same four vertices: 36 duplicate faces and 18 edges with
+             four faces on them. The pole is closed by the f1/f2 === 0 guard and
+             the rim by that loop, so neither belongs here. */
+          if (ci < 0 || ci >= cS) continue;
+          if (!cKept[ci][cj]) continue;
           var f1, f2, fm;
           if (d2 === 0) { f1 = [i, j]; f2 = [i, j + 1]; fm = cupPt(i / cS, (j + 0.5) / cT * TAU); }
           else if (d2 === 1) { f1 = [i + 1, j]; f2 = [i + 1, j + 1]; fm = cupPt((i + 1) / cS, (j + 0.5) / cT * TAU); }
@@ -648,7 +736,16 @@
           if (dot(nn2, [fm[0] - chl.x, fm[1] - chl.y, 0]) > 0) cup.quad(a1, b1, b2, a2); else cup.quad(a1, a2, b2, b1);
         }
       }
-      for (j = 0; j < cT; j++) cup.quad(CO(cS, j), CI(cS, j), CI(cS, j + 1), CO(cS, j + 1));
+      /* Rim cap, but only where the last row actually has material. The exhale
+         apertures cut through the rim, and capping across a notch that is not
+         there left edges with nothing to pair against. The notch sides are
+         closed by the wall loop above. */
+      for (j = 0; j < cT; j++) {
+        if (!cKept[cS - 1][((j % cT) + cT) % cT]) continue;
+        cup.quad(CO(cS, j), CI(cS, j), CI(cS, j + 1), CO(cS, j + 1));
+      }
+      /* Same hole-centre heuristic as the shell walls, same unreliability. */
+      orientPart(cup);
       parts.push(cup);
     }
 

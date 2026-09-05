@@ -494,45 +494,41 @@ try{document.documentElement.dataset.theme=localStorage.getItem('pulsemask.theme
   <p>Parts overlap rather than boolean-union — they are separate solids, not a single watertight
   body, so do not expect a boolean-heavy workflow to be free.</p>
 
-  <h3>Mesh integrity — measured, and it is not perfect</h3>
-  <p>There is now a manifold validator in the pipeline, and it changed what we can honestly say.
-  This page used to tell you the geometry was "closed by construction". Having actually checked,
-  that turns out not to be true for every part. Run it yourself:</p>
+  <h3>Mesh integrity — measured, not assumed</h3>
+  <p>This page used to tell you the geometry was "closed by construction". Then a validator got
+  written, and 11 of the 30 parts turned out not to be closed at all. All 11 have since been
+  repaired. Every part now passes, and you do not have to take that on trust — the check ships
+  with the files:</p>
   <p><span class="mono">node cli.mjs --validate</span></p>
 
   <div class="spec">
     <div>
       <div><div class="k">Parts fully watertight</div>
-        <div class="kd">Closed, correctly wound, no duplicate or non-manifold edges — these slice with no repair at all</div></div>
-      <div class="v">28 <small>of 30</small></div>
+        <div class="kd">Closed, correctly wound, no duplicate or non-manifold edges. Verified by the validator, not by eye — run it yourself with <span class="mono">node cli.mjs --validate</span></div></div>
+      <div class="v ok">30 <small>of 30</small></div>
     </div>
     <div>
-      <div><div class="k">Still failing</div>
-        <div class="kd"><span class="mono">shell_outer</span> — 240 open boundary edges and 120 overlapping faces. <span class="mono">oronasal_cup</span> — 18 non-manifold edges and 36 overlapping faces</div></div>
-      <div class="v bad">2 <small>parts</small></div>
-    </div>
-    <div>
-      <div><div class="k">Fixed so far</div>
-        <div class="kd">Eight parts repaired: four were closed but wound inside-out, four had open profiles or missing caps. All verified with the validator, not by eye</div></div>
-      <div class="v">8 <small>parts · was 19/30</small></div>
+      <div><div class="k">Where it started</div>
+        <div class="kd">The day the validator was written, 11 parts failed — while this page still claimed the geometry was "closed by construction". Every one has since been repaired</div></div>
+      <div class="v">19 <small>of 30 · was</small></div>
     </div>
   </div>
 
-  <p style="margin-top:18px">The two that remain are the two that matter most, and there is no
-  point pretending otherwise: <span class="mono">shell_outer</span> is the part you will spend
-  eight hours printing, and <span class="mono">oronasal_cup</span> is the part that sits against
-  your face. <strong>Run your slicer's repair pass and look at the preview before you commit to a
-  long print.</strong> PrusaSlicer, Cura and Bambu Studio all repair meshes like these routinely —
-  the point is that you should expect to, not be surprised by it.</p>
+  <p style="margin-top:18px">Three separate causes, all now fixed. The lathe primitive wound
+  its faces inward while the cylinder primitive wound them outward, so every closed part built
+  with it came out inside-out — that alone was seven of the eleven. Several parts were open
+  profiles or zero-thickness surfaces that could not be printed as solids at all. And the shell
+  and the cup picked their aperture-wall winding with a geometric guess that failed on
+  tangential segments; that is now decided topologically instead.</p>
 
-  <p>Most of the earlier failures shared one cause: the lathe primitive wound its faces inward,
-  so every closed part built with it came out inside-out. It went unnoticed for a long time
-  because the volume helper returned an absolute value, so the mass figures were right no matter
-  which way the normals faced. One primitive fix corrected four parts at once.</p>
+  <p><strong>You should still glance at your slicer's preview before an eight-hour print.</strong>
+  Watertight is not the same as sensible — the parts still overlap rather than boolean-union,
+  which is by design, and nothing here has been printed and measured yet.</p>
 
-  <p>This is being fixed in public, part by part. The count above is what the validator reports
-  for the current release and it moves as parts are repaired; if it disagrees with what
-  <span class="mono">--validate</span> prints for your download, trust the validator.</p>
+  <p>The count above is what the validator reports for the current release. If it ever
+  disagrees with what <span class="mono">--validate</span> prints for your download, trust the
+  validator, not this page.</p>
+
   <p>The visor is not on this list because it is not a printed part. That one is cut from sheet —
   see <a href="#assembly">finishing and assembly</a>.</p>
 </section>
