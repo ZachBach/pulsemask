@@ -55,7 +55,24 @@
     if (capB && r1 > 1e-6) { var ct = p.v(0, h, 0); for (j = 0; j < segs; j++) { k = (j + 1) % segs; p.tri(ct, top[k], top[j]); } }
   }
 
-  /* profile [[r,y],...] revolved about +y; r→0 rings collapse to poles */
+  /* profile [[r,y],...] revolved about +y; r→0 rings collapse to poles.
+
+     WINDING. Rings are emitted in profile order, so for the ascending profiles
+     every caller here uses, ring i is below ring i+1. The faces are wound so
+     that a closed profile yields OUTWARD normals, matching cylinder(). This was
+     backwards until the Track 4 validator caught it: all four closed lathes
+     (pzt_blower_stack, uvc_reactor_housing, filter_cartridge, pzt_coalescer)
+     came out with negative signed volume — closed, but inside-out, which a
+     slicer can read as a void. It went unnoticed for so long because
+     volumeOf() returns Math.abs(v), so the mass metric was right either way.
+
+     For a profile that closes back on itself (a ring cross-section rather than
+     a solid of revolution about the axis), what decides the normal direction is
+     the orientation of that loop in the (r,y) plane: traverse it
+     counter-clockwise — along the base outward, then up, then back inward — and
+     the normals point out. Clockwise closes the surface just as well but leaves
+     it inside-out, which is how intake_grille first came back. There is no
+     runtime check for this; `node cli.mjs --validate` reports the volume sign. */
   function lathe(p, profile, segs) {
     var rings = [], i, j, k, row;
     for (i = 0; i < profile.length; i++) {
@@ -70,9 +87,9 @@
       for (j = 0; j < segs; j++) {
         k = (j + 1) % segs;
         if (lo.length === 1 && hi.length === 1) continue;
-        if (lo.length === 1) p.tri(lo[0], hi[k], hi[j]);
-        else if (hi.length === 1) p.tri(hi[0], lo[j], lo[k]);
-        else p.quad(lo[j], lo[k], hi[k], hi[j]);
+        if (lo.length === 1) p.tri(lo[0], hi[j], hi[k]);
+        else if (hi.length === 1) p.tri(hi[0], lo[k], lo[j]);
+        else p.quad(lo[j], hi[j], hi[k], lo[k]);
       }
     }
   }
@@ -646,8 +663,12 @@
 
       var collar = new Part('canister_collar', 'shell_polymer', 32);
       collar.push(mul(base, T(0, -0.012, 0)));
-      cylinder(collar, R * 0.66, R * 0.66, 0.020, 44, false, false);
-      cylinder(collar, R * 0.57, R * 0.57, 0.020, 44, false, false);
+      /* Was two uncapped cylinders at these radii — 176 boundary edges and no
+         wall, so it could not be printed as a solid. Same two radii, now one
+         closed annular profile: the ends are capped by the profile returning to
+         its start, which is the pattern pzt_coalescer already used. */
+      lathe(collar, [[R * 0.57, 0], [R * 0.66, 0], [R * 0.66, 0.020],
+                     [R * 0.57, 0.020], [R * 0.57, 0]], 44);
       collar.pop(); parts.push(collar);
 
       var blower = new Part('pzt_blower_stack', 'pzt_ceramic', 32);
@@ -666,7 +687,12 @@
 
       var band = new Part('uv_status_band', 'uv_indicator', 40);
       band.push(mul(base, T(0, y0 + RL * 0.36, 0)));
-      cylinder(band, R * 0.875, R * 0.875, RL * 0.28, 44, false, false);
+      /* Was a zero-thickness cylinder — a surface, not a solid, so it had 88
+         boundary edges and nothing to print. Given a wall straddling the old
+         radius (0.860–0.890 R, mean unchanged at 0.875 R) so it stays exactly
+         where it sat in the reactor waist and still reads as an indicator band. */
+      lathe(band, [[R * 0.860, 0], [R * 0.890, 0], [R * 0.890, RL * 0.28],
+                   [R * 0.860, RL * 0.28], [R * 0.860, 0]], 44);
       band.pop(); parts.push(band);
 
       var leds = new Part('uvc_led_array', 'cartridge_alloy', 32);
@@ -707,14 +733,24 @@
       grille.push(mul(base, T(0, y1 + fl + 0.0074 + ex * 0.014, 0)));
       for (var g2 = 0; g2 < 3; g2++) {
         var rr = R * (0.26 + g2 * 0.24);
-        lathe(grille, [[rr - 0.0019, 0], [rr, 0.0024], [rr + 0.0019, 0]], 40);
+        /* Each concentric ridge was an open arc — 80 boundary edges apiece,
+           240 across the three. Returning to the start point closes the
+           triangular cross-section into a solid ring. Corners run
+           counter-clockwise in the (r,y) plane — base outward, then up to the
+           apex — because that is the orientation lathe() turns into outward
+           normals; the clockwise ordering closed it but left it inside-out. */
+        lathe(grille, [[rr - 0.0019, 0], [rr + 0.0019, 0], [rr, 0.0024], [rr - 0.0019, 0]], 40);
       }
-      cylinder(grille, R * 0.09, R * 0.09, 0.0038, 18, false, true);
+      /* capA was false, leaving the centre boss open at the bottom (18 edges). */
+      cylinder(grille, R * 0.09, R * 0.09, 0.0038, 18, true, true);
       grille.pop(); parts.push(grille);
 
       var ctrl = new Part('controller_band', 'cartridge_alloy', 34);
       ctrl.push(mul(base, T(0, 0.0032, 0)));
-      lathe(ctrl, [[R * 0.84, 0], [R * 0.99, 0.0022], [R * 0.99, 0.0102], [R * 0.84, 0.0124]], 44);
+      /* Trailing [R*0.84, 0] closes the cross-section back to its start — the
+         profile described an open band before, leaving 88 boundary edges. */
+      lathe(ctrl, [[R * 0.84, 0], [R * 0.99, 0.0022], [R * 0.99, 0.0102],
+                   [R * 0.84, 0.0124], [R * 0.84, 0]], 44);
       ctrl.pop();
       ctrl.push(mul(mul(base, T(0, 0.0062, R * 0.99)), Rx(Math.PI / 2)));
       box(ctrl, 0.0098, 0.0034, 0.0022);
@@ -751,8 +787,11 @@
         var vx = sg * exX, vy = exY, vz = shellZ(vx, vy);
         var vb = mul(mul(T(vx + sg * ex * 0.05, vy, vz + ex * 0.03), Ry(sg * 0.55)), Rx(Math.PI / 2));
         valve.push(vb);
-        lathe(valve, [[0.0135, -0.0020], [0.0162, 0.0012], [0.0162, 0.0052], [0.0138, 0.0090],
-                      [0.0082, 0.0112], [0, 0.0120]], 6);
+        /* Leading [0, -0.0020] closes the base to the axis. The profile used to
+           start at r = 0.0135, leaving an open ring — 6 boundary edges per
+           valve, 12 across the pair. The cover now has a floor. */
+        lathe(valve, [[0, -0.0020], [0.0135, -0.0020], [0.0162, 0.0012], [0.0162, 0.0052],
+                      [0.0138, 0.0090], [0.0082, 0.0112], [0, 0.0120]], 6);
         valve.pop();
         for (var vf2 = 0; vf2 < 3; vf2++) {
           valve.push(mul(mul(vb, T(0, 0.0064, 0)), Ry(vf2 / 3 * Math.PI)));
