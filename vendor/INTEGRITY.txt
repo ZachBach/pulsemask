@@ -1,0 +1,41 @@
+Vendored three.js r0.184.0 — provenance record
+==============================================
+
+These files were downloaded from unpkg and verified byte-identical to the
+sha384 hashes that were previously pinned in each page's import map.
+
+The import map no longer carries an `integrity` block, and that is not a
+downgrade: subresource integrity guards against a THIRD PARTY serving you
+different bytes. These files are now same-origin, served from the same
+GitHub Pages deployment as the HTML that loads them. There is no third party
+left to guard against, and anyone who can alter these files can equally alter
+the hashes next to them.
+
+What replaces it is this record. To confirm a vendored file still matches the
+authentic upstream release:
+
+    curl -sL https://unpkg.com/three@0.184.0/build/three.webgpu.js \
+      | openssl dgst -sha384 -binary | openssl base64 -A
+
+sha384, base64:
+
+  three.webgpu.js   vatRh9vQy/B/ECoJSF7P/Jg9rF6KVuG/ovU+3Wp/BUaCcpR0DM+a4zCEbQ8Y/RFK
+    upstream: build/three.webgpu.js
+  three.core.js     dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT
+    upstream: build/three.core.js   (relative import of three.webgpu.js)
+  three.tsl.js      dqftyqccaI6qYFdGtJtugSSe4YKncDgGHttpZJr+lR/vSq18VR5ubqlzEHdGLdJ1
+    upstream: build/three.tsl.js
+  OrbitControls.js  4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9
+    upstream: examples/jsm/controls/OrbitControls.js
+  OBJExporter.js    nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3
+    upstream: examples/jsm/exporters/OBJExporter.js
+  GLTFExporter.js   VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ
+    upstream: examples/jsm/exporters/GLTFExporter.js
+
+three.js is MIT licensed, (c) 2010-2026 three.js authors. Redistributing it —
+which vendoring is — requires the copyright and permission notice to travel
+with it; the notice is at the top of three.webgpu.js and three.core.js, intact
+and unmodified. See LICENSE.md section 7.
+
+Fonts in vendor/fonts/ are SIL Open Font License 1.1; the licence text ships
+beside them as OFL-ChakraPetch.txt and OFL-IBMPlex.txt, as the OFL requires.

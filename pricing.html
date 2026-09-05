@@ -8,9 +8,9 @@
 <script>/* apply the saved theme before first paint — prevents a dark flash for
    light-theme visitors; the end-of-body script still owns the button */
 try{document.documentElement.dataset.theme=localStorage.getItem('pulsemask.theme')||'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Self-hosted fonts: no external request, so the page renders identically
+     in regions where fonts.googleapis.com is blocked. -->
+<link rel="stylesheet" href="vendor/fonts.css">
 <style>
   :root{
     --neon:#6EFF3C; --neon-2:#00E58A; --neon-ink:#0E8F35; --hz:#B57BFF;

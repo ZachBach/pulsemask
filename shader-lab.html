@@ -8,36 +8,33 @@
 <script>/* apply the saved theme before first paint; the module script below still
    owns the theme button and stage background — this only prevents a flash */
 try{document.documentElement.dataset.theme=localStorage.getItem('pulsemask.theme')||'dark'}catch(e){document.documentElement.dataset.theme='dark'}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- Track 3 · WebGPU + TSL. Identical map to index.html, and identical reasoning:
-     "three" and "three/webgpu" resolve to the same three.webgpu.js URL so there
-     is exactly one module instance, three.tsl.js imports the bare specifier
-     "three/webgpu" so that key is mandatory, and three.core.js is a relative
-     import of the webgpu build (hashed below). Still fully integrity-pinned.
+<!-- Self-hosted fonts: no external request, so the page renders identically
+     in regions where fonts.googleapis.com is blocked. -->
+<link rel="stylesheet" href="vendor/fonts.css">
+<!-- three.js r0.184.0, VENDORED. The site makes no external runtime request at
+     all now: unpkg is blocked or unreachable on some networks, and when it is,
+     a CDN-loaded three means no 3D on either viewer page. Self-hosting removes
+     the only single point of failure on an otherwise backend-free site.
 
-     Both viewer pages now run the same backend, which is what keeps the Lab's
-     preview honest — a finish previewed here renders through the same path as
-     the generator. Hashes regenerated with:
-       curl -sL <url> | openssl dgst -sha384 -binary | openssl base64 -A -->
+     Still exactly ONE copy of three: "three" and "three/webgpu" resolve to the
+     same file, so there is one module instance. "three/webgpu" is mandatory,
+     not decorative — three.tsl.js imports that bare specifier. three.core.js is
+     a relative import of three.webgpu.js and resolves inside vendor/.
+
+     There is no integrity block any more, and that is not a downgrade: SRI
+     defends against a third party serving different bytes, and these files are
+     now same-origin. The sha384 hashes they were verified against are recorded
+     in vendor/INTEGRITY.txt, which also carries the MIT and OFL notices that
+     redistribution requires. -->
 <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.184.0/build/three.webgpu.js",
-    "three/webgpu": "https://unpkg.com/three@0.184.0/build/three.webgpu.js",
-    "three/tsl": "https://unpkg.com/three@0.184.0/build/three.tsl.js",
-    "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js",
-    "three/addons/exporters/OBJExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js",
-    "three/addons/exporters/GLTFExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js"
-  },
-  "integrity": {
-    "https://unpkg.com/three@0.184.0/build/three.webgpu.js": "sha384-vatRh9vQy/B/ECoJSF7P/Jg9rF6KVuG/ovU+3Wp/BUaCcpR0DM+a4zCEbQ8Y/RFK",
-    "https://unpkg.com/three@0.184.0/build/three.tsl.js": "sha384-dqftyqccaI6qYFdGtJtugSSe4YKncDgGHttpZJr+lR/vSq18VR5ubqlzEHdGLdJ1",
-    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT",
-    "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js": "sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9",
-    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js": "sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3",
-    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js": "sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ"
+    "three": "./vendor/three.webgpu.js",
+    "three/webgpu": "./vendor/three.webgpu.js",
+    "three/tsl": "./vendor/three.tsl.js",
+    "three/addons/controls/OrbitControls.js": "./vendor/OrbitControls.js",
+    "three/addons/exporters/OBJExporter.js": "./vendor/OBJExporter.js",
+    "three/addons/exporters/GLTFExporter.js": "./vendor/GLTFExporter.js"
   }
 }
 </script>

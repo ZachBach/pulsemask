@@ -114,21 +114,36 @@ conversation overrides it.
 
 ## 7. Third-party components
 
-This project loads, but does not redistribute, the following. Each remains under its own
-license and its own copyright:
+This project **redistributes** the following, vendored under `vendor/`. Each remains under
+its own license and its own copyright:
 
-| Component | Version | License | Notes |
+| Component | Version | License | Where |
 |---|---|---|---|
-| [three.js](https://threejs.org) | r0.184.0 | MIT — © 2010–2025 three.js authors | Loaded from unpkg via an integrity-pinned import map. Not vendored into this repo. |
-| [Chakra Petch](https://fonts.google.com/specimen/Chakra+Petch) | — | SIL Open Font License 1.1 | Loaded from Google Fonts. Not vendored. |
-| [IBM Plex Sans / Mono](https://www.ibm.com/plex/) | — | SIL Open Font License 1.1 | Loaded from Google Fonts. Not vendored. |
+| [three.js](https://threejs.org) | r0.184.0 | MIT — © 2010–2026 three.js authors | `vendor/three.webgpu.js`, `three.core.js`, `three.tsl.js`, `OrbitControls.js`, `OBJExporter.js`, `GLTFExporter.js` |
+| [Chakra Petch](https://fonts.google.com/specimen/Chakra+Petch) | — | SIL Open Font License 1.1 | `vendor/fonts/chakra-petch-*.woff2` |
+| [IBM Plex Sans / Mono](https://www.ibm.com/plex/) | — | SIL Open Font License 1.1 | `vendor/fonts/ibm-plex-*.woff2` |
 
-**If any of these is ever inlined or vendored** rather than linked — as the parent Aurelius
-Dynamic landing page does with its embedded three.js builds — the corresponding license text
-must travel with it. MIT requires the copyright notice and permission notice to accompany
-redistributed copies; the OFL requires its license to accompany redistributed font files and
-forbids selling the fonts on their own. Linking to a CDN, which is what happens today, does
-not trigger either obligation.
+These were previously loaded from CDNs, which triggered no redistribution obligation.
+They are now served from this origin so the site makes **no external runtime request at
+all** — unpkg and `fonts.googleapis.com` are blocked or unreachable on some networks, and
+a CDN-loaded three.js means no 3D at all when it fails. Vendoring removes the only
+single point of failure on an otherwise backend-free site.
+
+Redistribution carries obligations, and they are met:
+
+- **MIT** requires the copyright and permission notice to accompany redistributed copies.
+  The notice is intact and unmodified at the head of `three.webgpu.js` and `three.core.js`.
+- **OFL 1.1** requires its license to accompany redistributed font files, and forbids
+  selling the fonts on their own. `vendor/fonts/OFL-ChakraPetch.txt` and
+  `vendor/fonts/OFL-IBMPlex.txt` ship beside them. The fonts are not sold; they are a
+  component of a freely readable website. Reserved font names are unchanged, and no font
+  file has been modified — only subset to latin and latin-ext, which is how Google Fonts
+  already served them.
+
+`vendor/INTEGRITY.txt` records the sha384 hash of every vendored JavaScript file, verified
+byte-identical to the upstream release at the time of vendoring, together with the command
+to re-verify. That record replaces the import map's `integrity` block, which became
+meaningless once the files were same-origin.
 
 ---
 
