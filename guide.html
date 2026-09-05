@@ -491,12 +491,47 @@ try{document.documentElement.dataset.theme=localStorage.getItem('pulsemask.theme
   </ul>
 
   <h3>Before you start a long print</h3>
-  <p>Two things worth knowing about these meshes. Parts overlap rather than boolean-union — each
-  one is individually closed and slicers cope, but the union is not a single watertight solid, so
-  do not expect a boolean-heavy workflow to be free. And there is <strong>no manifold check in the
-  pipeline yet</strong>: the geometry is generated closed by construction, not verified closed by
-  a validator. Run your slicer's repair pass and look at the preview before you commit eight hours
-  to a shell.</p>
+  <p>Parts overlap rather than boolean-union — they are separate solids, not a single watertight
+  body, so do not expect a boolean-heavy workflow to be free.</p>
+
+  <h3>Mesh integrity — measured, and it is not perfect</h3>
+  <p>There is now a manifold validator in the pipeline, and it changed what we can honestly say.
+  This page used to tell you the geometry was "closed by construction". Having actually checked,
+  that turns out not to be true for every part. Run it yourself:</p>
+  <p><span class="mono">node cli.mjs --validate</span></p>
+
+  <div class="spec">
+    <div>
+      <div><div class="k">Parts fully watertight</div>
+        <div class="kd">Closed, correctly wound, no duplicate or non-manifold edges — these slice with no repair at all</div></div>
+      <div class="v">19 <small>of 30</small></div>
+    </div>
+    <div>
+      <div><div class="k">Parts with open edges</div>
+        <div class="kd"><span class="mono">shell_outer</span> · <span class="mono">intake_grille</span> · <span class="mono">canister_collar</span> · <span class="mono">uv_status_band</span> · <span class="mono">controller_band</span> · <span class="mono">exhale_valve</span> — holes a slicer has to bridge</div></div>
+      <div class="v">6 <small>parts</small></div>
+    </div>
+    <div>
+      <div><div class="k">Parts wound inside-out</div>
+        <div class="kd"><span class="mono">pzt_blower_stack</span> · <span class="mono">uvc_reactor_housing</span> · <span class="mono">filter_cartridge</span> · <span class="mono">pzt_coalescer</span> — closed, but normals face inward, so a slicer may read them as voids</div></div>
+      <div class="v">4 <small>parts</small></div>
+    </div>
+    <div>
+      <div><div class="k">Non-manifold / overlapping</div>
+        <div class="kd"><span class="mono">oronasal_cup</span> has 18 non-manifold edges and 36 overlapping faces; <span class="mono">shell_outer</span> has 120 overlapping faces</div></div>
+      <div class="v">2 <small>parts</small></div>
+    </div>
+  </div>
+
+  <p style="margin-top:18px">The one that matters most is <span class="mono">shell_outer</span>,
+  because it is the part you will actually spend eight hours printing, and it is on both failing
+  lists. <strong>Run your slicer's repair pass and look at the preview before you commit to a long
+  print.</strong> PrusaSlicer, Cura and Bambu Studio all repair meshes like these routinely — the
+  point is that you should expect to, not be surprised by it.</p>
+
+  <p>This is being fixed part by part rather than quietly. The count above comes from the
+  validator on the current release and will move as parts are repaired; if it disagrees with what
+  <span class="mono">--validate</span> prints for your download, trust the validator.</p>
   <p>The visor is not on this list because it is not a printed part. That one is cut from sheet —
   see <a href="#assembly">finishing and assembly</a>.</p>
 </section>

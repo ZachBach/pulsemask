@@ -810,6 +810,7 @@ function buildModel(){
   buildRadar();
   applyView();
   updateMetrics(result.metrics, worstDev * 1000, performance.now() - t0);
+  runValidate();
   if (!framed){ stage.setObject(model); framed = true; }
 }
 
@@ -1088,13 +1089,38 @@ const MCARDS = [
   { k:'PZT channels', get:(m)=>({ v:m.pztTotal, u:'',
       note:'seal sensing · coalescer · capsid · blower · harvest' }) },
   { k:'Mesh', get:(m,d,ms)=>({ v:(m.triangles/1000).toFixed(1), u:'k tris',
-      note:`generated in ${ms.toFixed(0)} ms` }) }
+      note:`generated in ${ms.toFixed(0)} ms` }) },
+  /* Track 4. Reads from a separate settle-timer pass — see runValidate(). */
+  { k:'Watertight parts', get:()=>{
+      if (!MANIFOLD) return { v:'–', u:'checking…', note:'manifold validation running' };
+      const n = MANIFOLD.parts.length - MANIFOLD.failed.length;
+      return { v:String(n), u:`of ${MANIFOLD.parts.length}`,
+        note: MANIFOLD.ok ? 'all parts closed and correctly wound'
+                          : `${MANIFOLD.failed.length} need a slicer repair pass — see the guide`,
+        bar: n / MANIFOLD.parts.length,
+        cls: MANIFOLD.ok ? 'ok' : 'flag' };
+    } }
 ];
+/* Manifold result, filled asynchronously. Validation costs ~70 ms against a
+   ~130 ms rebuild, so running it inline would add half again to every slider
+   drag. It runs once the sliders go quiet instead. */
+let MANIFOLD = null, validateTimer = null;
+function runValidate(){
+  clearTimeout(validateTimer);
+  validateTimer = setTimeout(()=>{
+    if (!result) return;
+    try { MANIFOLD = MaskGeometry.validate(result.parts); }
+    catch (e) { MANIFOLD = null; console.warn('[validate] failed:', e); }
+    if (result) updateMetrics(result.metrics, lastDev, lastMs);
+  }, 400);
+}
 const mEl = document.getElementById('metrics');
 mEl.innerHTML = MCARDS.map(c=>`<div class="m"><div class="k">${c.k}</div>
   <div class="v"><em style="font-style:normal">–</em><span></span></div>
   <div class="n"></div></div>`).join('');
+let lastDev = 0, lastMs = 0;
 function updateMetrics(m, dev, ms){
+  lastDev = dev; lastMs = ms;
   MCARDS.forEach((c, i)=>{
     const r = c.get(m, dev, ms), el = mEl.children[i];
     el.className = 'm ' + (r.cls || '');

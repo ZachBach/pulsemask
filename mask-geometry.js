@@ -1084,5 +1084,117 @@
     return buf;
   }
 
-  root.MaskGeometry = { build: build, toSTL: toSTL, DEFAULTS: DEFAULTS, MATERIALS: MATERIALS };
+  /* ================= manifold validation =================
+     Track 4. Until now the geometry was closed BY CONSTRUCTION but never closed
+     BY VERIFICATION, and the print guide said so. This closes that.
+
+     WHY IT WELDS FIRST. finalize() splits vertices along crease edges so hard
+     edges shade correctly, so two triangles sharing a geometric edge routinely
+     hold different indices. Checking edges by index would report a hole at
+     every crease — nonsense. Welding by quantised position is also exactly what
+     a slicer does when it reads an STL, where every triangle is standalone and
+     shares nothing at all. So this validates the thing the slicer will actually
+     see, not an intermediate representation.
+
+     Tolerance defaults to 1e-7 m (0.1 um): far below any printer's resolution,
+     far above float32 noise from the STL round-trip.
+
+     A part is watertight and consistently wound iff every directed edge (a->b)
+     occurs exactly once and its opposite (b->a) also occurs exactly once. That
+     single test catches holes, duplicate faces and flipped winding together. */
+  function validatePart(part, tol) {
+    tol = tol || 1e-7;
+    var pos = part.positions, idx = part.indices;
+    var inv = 1 / tol, nv = pos.length / 3;
+    var weld = new Int32Array(nv), i;
+
+    /* Weld with a numeric spatial hash rather than string keys. The obvious
+       "qx_qy_qz" string version cost 760 ms on a default build — six times the
+       whole geometry rebuild — because it allocates a string per vertex and per
+       edge. Hashing to an int and resolving collisions by comparing the
+       quantised coordinates is the same answer for ~1/20th of the time. */
+    var qx = new Int32Array(nv), qy = new Int32Array(nv), qz = new Int32Array(nv);
+    for (i = 0; i < nv; i++) {
+      qx[i] = Math.round(pos[i*3] * inv);
+      qy[i] = Math.round(pos[i*3+1] * inv);
+      qz[i] = Math.round(pos[i*3+2] * inv);
+    }
+    var buckets = new Map(), wn = 0;
+    for (i = 0; i < nv; i++) {
+      var h = (qx[i] * 73856093 ^ qy[i] * 19349663 ^ qz[i] * 83492791) | 0;
+      var bucket = buckets.get(h), found = -1;
+      if (bucket === undefined) { bucket = []; buckets.set(h, bucket); }
+      for (var bi = 0; bi < bucket.length; bi++) {
+        var o = bucket[bi];
+        if (qx[o] === qx[i] && qy[o] === qy[i] && qz[o] === qz[i]) { found = weld[o]; break; }
+      }
+      if (found < 0) { found = wn++; bucket.push(i); }
+      weld[i] = found;
+    }
+
+    /* Directed-edge tally keyed on u*S+v. S is the welded vertex count, so the
+       key is unique and stays an exact integer well inside 2^53. */
+    var S = wn + 1, edges = new Map(), degenerate = 0, nf = idx.length / 3, f;
+    for (f = 0; f < nf; f++) {
+      var a = weld[idx[f*3]], b = weld[idx[f*3+1]], c = weld[idx[f*3+2]];
+      /* A triangle whose welded corners collapse has no area and no edges to
+         match. Slicers drop these silently; count them, do not let them skew
+         the edge tally. */
+      if (a === b || b === c || a === c) { degenerate++; continue; }
+      var k1 = a * S + b, k2 = b * S + c, k3 = c * S + a;
+      edges.set(k1, (edges.get(k1) || 0) + 1);
+      edges.set(k2, (edges.get(k2) || 0) + 1);
+      edges.set(k3, (edges.get(k3) || 0) + 1);
+    }
+
+    var boundary = 0, nonManifold = 0, duplicate = 0;
+    edges.forEach(function (count, k) {
+      var u = Math.floor(k / S), v = k - u * S;
+      if (count > 1) duplicate += count - 1;          /* same edge, same direction: overlapping faces */
+      var opp = edges.get(v * S + u) || 0;
+      if (opp === 0) boundary += count;               /* nothing closes this edge: a hole */
+      /* count each undirected edge once — only from the (u<v) side */
+      if (u < v && count + opp > 2) nonManifold++;    /* >2 faces meet on one edge */
+    });
+
+    /* Signed volume. Positive means outward-facing winding; a negative result on
+       a closed shell means the part is inside-out and will slice as a void. */
+    var vol = 0;
+    for (f = 0; f < nf; f++) {
+      var p0 = idx[f*3]*3, p1 = idx[f*3+1]*3, p2 = idx[f*3+2]*3;
+      vol += (pos[p0] * (pos[p1+1]*pos[p2+2] - pos[p1+2]*pos[p2+1])
+            - pos[p0+1] * (pos[p1]*pos[p2+2] - pos[p1+2]*pos[p2])
+            + pos[p0+2] * (pos[p1]*pos[p2+1] - pos[p1+1]*pos[p2])) / 6;
+    }
+
+    var closed = boundary === 0 && nonManifold === 0 && duplicate === 0;
+    return {
+      name: part.name,
+      ok: closed && vol > 0,
+      closed: closed,
+      triangles: nf,
+      vertices: pos.length / 3,
+      welded: wn,
+      boundaryEdges: boundary,
+      nonManifoldEdges: nonManifold,
+      duplicateFaces: duplicate,
+      degenerateFaces: degenerate,
+      volumeCM3: vol * 1e6,
+      inverted: closed && vol < 0
+    };
+  }
+
+  /* Validate every part. Returns { ok, parts:[…], failed:[names] }. */
+  function validate(parts, tol) {
+    var out = [], failed = [], i;
+    for (i = 0; i < parts.length; i++) {
+      var r = validatePart(parts[i], tol);
+      out.push(r);
+      if (!r.ok) failed.push(r.name);
+    }
+    return { ok: failed.length === 0, parts: out, failed: failed };
+  }
+
+  root.MaskGeometry = { build: build, toSTL: toSTL, validate: validate,
+                        validatePart: validatePart, DEFAULTS: DEFAULTS, MATERIALS: MATERIALS };
 })(typeof window !== 'undefined' ? window : this);

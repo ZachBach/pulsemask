@@ -435,8 +435,13 @@ try{document.documentElement.dataset.theme=localStorage.getItem('pulsemask.theme
     </div>
     <div>
       <div><div class="k">Geometry output</div>
-        <div class="kd">Named, individually closed meshes at default tessellation — what actually lands in your download</div></div>
+        <div class="kd">Named meshes at default tessellation — what actually lands in your download</div></div>
       <div class="v">30 <small>parts · 80.4k triangles</small></div>
+    </div>
+    <div>
+      <div><div class="k">Parts passing manifold validation</div>
+        <div class="kd">Watertight, correctly wound, no duplicate or non-manifold edges. The other 11 have open edges, inverted winding or overlapping faces and need a slicer repair pass — <a href="guide.html#printing">the full breakdown is in the guide</a>. This page previously said the parts were closed; a validator was written, and they are not</div></div>
+      <div class="v bad">19 <small>of 30 · 63%</small></div>
     </div>
     <div>
       <div><div class="k">Shell, printed</div>

@@ -38,6 +38,7 @@ if (argv.includes('-h') || argv.includes('--help')) {
   console.log('\nPulseMask headless generator\n');
   console.log('  -o, --out <path>     output .stl (default export/mask.stl)');
   console.log('      --metrics-only   print the engineering readout, write nothing');
+  console.log('      --validate       per-part manifold check; exits 1 if any part fails');
   console.log('      --no-face        omit the reconstructed face form (default: omitted)');
   console.log('      --with-face      include the face form in the STL');
   for (const [f, d] of Object.entries(FLAGS)) console.log(`      --${f.padEnd(15)}${d.help}`);
@@ -94,6 +95,35 @@ row('mesh', `${res.parts.length} parts · ${(m.triangles / 1000).toFixed(1)}k tr
 if (m.uvDose < 3) {
   console.log('\n  ⚠ dose is below the 2-log target. Length alone will not fix this —');
   console.log('    dose ≈ P·η·ρ·r / 2Q, so raise --leds, --power, --refl, or drop --flow.');
+}
+
+/* Track 4. Reports what the geometry IS, not what it was assumed to be —
+   welded by position first, because that is what a slicer sees in an STL. */
+if (has('validate')) {
+  const v = MaskGeometry.validate(res.parts);
+  console.log('\nManifold check · ' + v.parts.length + ' parts');
+  console.log('  ' + 'part'.padEnd(21) + 'tris'.padStart(7) + 'bound'.padStart(7) +
+              'nonmf'.padStart(7) + 'dup'.padStart(6) + 'degen'.padStart(7) + '   verdict');
+  for (const p of v.parts) {
+    const why = p.ok ? 'closed'
+      : [p.boundaryEdges ? 'open' : null,
+         p.nonManifoldEdges ? 'non-manifold' : null,
+         p.duplicateFaces ? 'overlapping faces' : null,
+         p.inverted ? 'inside-out' : null].filter(Boolean).join(', ');
+    console.log('  ' + (p.ok ? ' ' : '✗') + p.name.padEnd(20) +
+      String(p.triangles).padStart(7) + String(p.boundaryEdges).padStart(7) +
+      String(p.nonManifoldEdges).padStart(7) + String(p.duplicateFaces).padStart(6) +
+      String(p.degenerateFaces).padStart(7) + '   ' + why);
+  }
+  if (v.ok) {
+    console.log('\n  all parts watertight and correctly wound\n');
+  } else {
+    console.log('\n  ' + v.failed.length + ' of ' + v.parts.length + ' parts FAILED: ' + v.failed.join(', '));
+    console.log('  "inside-out" means closed but wound inward — a slicer may read it as a void.');
+    console.log('  "open" means boundary edges: a hole a slicer has to guess how to bridge.');
+    console.log('  Run your slicer\'s repair pass; see the print guide.\n');
+    process.exit(1);
+  }
 }
 
 if (has('metrics-only')) { console.log(''); process.exit(0); }
