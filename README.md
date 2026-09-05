@@ -32,7 +32,7 @@ Open `index.html` in any modern browser. No build step, no server, no dependenci
 | `mask-geometry.js` | Dependency-free parametric geometry engine. Emits named parts and binary STL |
 | `three-d-stage.js` | 3D viewer shell: studio lighting, orbit controls, STL / OBJ / GLB export |
 | `cli.mjs` | Headless generator — `node cli.mjs --ipd 63 -o export/mask.stl` |
-| `shader-designs.js` | Shader Lab roster — 34 GLSL surface designs, single source of truth for the Lab |
+| `shader-designs.js` | Shader Lab roster — 34 TSL surface designs, single source of truth for the Lab |
 | `mission.html` | Mission, scope, readiness status and the seven-phase roadmap |
 | `guide.html` · `assembly.html` | Print &amp; fit guide, and the eleven-stage build walkthrough |
 | `shader-lab.html` · `pricing.html` | Finish designer, and ordering |
@@ -55,18 +55,27 @@ node cli.mjs --ipd 63 -o export/mask.stl
 
 ## Rendering
 
-three.js `WebGLRenderer` with custom vertex-buffer attributes injected into the standard PBR
-program:
+three.js `WebGPURenderer` with TSL node materials. Two custom per-vertex attributes drive the
+generator's visual readouts:
 
-- `aBase` — per-vertex origin for the scan-line build morph
-- `aFit` — per-vertex seal deviation, drives the fit heatmap
-- GPU point system for the airflow visualisation
+- `aBase` — per-vertex origin for the scan-line build morph, applied through `positionNode`
+- `aFit` — per-vertex seal deviation, drives the fit heatmap through `outputNode`
+- Airflow, LIDAR and radar point systems are `Sprite` + `instancedBufferAttribute`, not
+  `THREE.Points` — on a WebGPU backend `Points` is capped at one pixel and ignores `sizeNode`
 
-**On WebGPU / TSL:** the target is a `WebGPURenderer` + TSL node-material port. It is not in this
-build because this environment pins three.js to an integrity-locked import map that exposes only
-`three`, `OrbitControls`, `OBJExporter` and `GLTFExporter` — `three/webgpu` and `three/tsl` do not
-resolve. The shader work here is written as discrete attribute + uniform stages so the port is a
-material swap rather than a rewrite. Tracked as Phase 5.
+`three.webgpu.js` does not export `WebGLRenderer`, so there is no separate WebGL build. On a
+machine with no WebGPU adapter the renderer falls back to WebGPURenderer's own WebGL2 backend
+automatically. Read `stage.api` for which path is actually live — `webgpu` | `webgl2-fallback`
+— and note the page footer prints it, because claiming WebGPU on a machine that quietly fell
+back would be the rendering equivalent of rounding a metric in our favour.
+
+three.js is pinned at **r0.184.0** and vendored under `vendor/`, so the site makes no external
+runtime request, fonts included. Both viewer pages map `three` **and** `three/webgpu` to the
+same `vendor/three.webgpu.js` — one URL means one module instance, and a second copy of three
+in a single page is the thing never to do. The import map carries **no `integrity` block and
+should not gain one**: these files are same-origin, which is not the threat SRI defends
+against. `vendor/INTEGRITY.txt` records the sha384 of every vendored file along with the
+command to re-verify them.
 
 ## Architecture
 
@@ -83,10 +92,10 @@ material swap rather than a rewrite. Tracked as Phase 5.
 
 ## The open problem
 
-At 85 L/min peak inspiratory flow, air crosses a 28 mm reactor in ~27 ms, which yields roughly
-0.2 mJ/cm² against a ~3 mJ/cm² target for 2-log inactivation. The generator exposes reactor
-length, LED count, optical power, labyrinth reflectance and design flow so the boundary can be
-explored directly. Closing that gap needs a folded labyrinth, blower-decoupled flow, or a shift to
+At 85 L/min peak inspiratory flow, air crosses a 28 mm reactor in ~27 ms, which yields
+0.22 mJ/cm² against a ~3 mJ/cm² target for 2-log inactivation — 7% of it. The generator exposes
+reactor length, LED count, optical power, labyrinth reflectance and design flow so the boundary
+can be explored directly. Closing that gap needs a folded labyrinth, blower-decoupled flow, or a shift to
 treating UV-C as a between-breath filter-media steriliser. This is Phase 2.
 
 ## Safety
@@ -97,5 +106,5 @@ build needs a hard interlock and a leakage survey before power-on.
 
 ## Repository
 
-Intended to live as a **private** repository under the Aurelius Dynamic organisation,
-named `pulseMask_Tech`.
+Public at [github.com/ZachBach/pulsemask](https://github.com/ZachBach/pulsemask), served by
+GitHub Pages at <https://zachbach.github.io/pulsemask/>.
