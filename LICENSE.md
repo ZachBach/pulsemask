@@ -1,6 +1,6 @@
 # Licensing — PulseMask / pulseMask_Tech
 
-Copyright © 2026 Zach Auerbach, trading as **Aurelius Dynamic**. All rights reserved.
+Copyright © 2026 Zachary Auerbach, trading as **Aurelius Dynamic**. All rights reserved.
 
 Contact: [build@aureliusdynamic.com](mailto:build@aureliusdynamic.com)
 ORCID: [0009-0001-3046-9104](https://orcid.org/0009-0001-3046-9104)

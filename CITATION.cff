@@ -10,7 +10,7 @@ message: "If you reference this work, please cite it as below."
 type: software
 
 authors:
-  - given-names: Zach
+  - given-names: Zachary
     family-names: Auerbach
     orcid: "https://orcid.org/0009-0001-3046-9104"
     affiliation: "Aurelius Dynamic"
