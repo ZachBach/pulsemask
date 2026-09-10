@@ -1,0 +1,195 @@
+{
+  "metrics": {
+    "faceWidthMM": 140,
+    "faceHeightMM": 122,
+    "rimLengthMM": 548.177151,
+    "shellVolumeCM3": 48.294894,
+    "shellMassG": 48.777843,
+    "deadSpaceML": 39.749367,
+    "beadCompMM": 0.8,
+    "ledTotal": 16,
+    "dwellMS": 27.565717,
+    "irradiance": 7.406872,
+    "uvDose": 0.204176,
+    "lrv": 0.106388,
+    "pztTotal": 12,
+    "pvAreaCM2": 14.336,
+    "pvWatts": 0.315392,
+    "loadW": 1.448571,
+    "batteryWh": 5.204143,
+    "cellVolCM3": 21.68393,
+    "runtimeH": 3.592604,
+    "runtimeSolarH": 4.592515,
+    "runtimeDutyH": 15.467109,
+    "scaleCount": 160,
+    "triangles": 81072
+  },
+  "bboxMeters": {
+    "min": [
+      -0.0944831,
+      -0.11612152,
+      -0.07574522
+    ],
+    "max": [
+      0.0944831,
+      0.13831134,
+      0.09833755
+    ]
+  },
+  "parts": [
+    {
+      "name": "shell_outer",
+      "triangles": 20656,
+      "vertices": 14435
+    },
+    {
+      "name": "visor_lens",
+      "triangles": 5376,
+      "vertices": 2888
+    },
+    {
+      "name": "visor_gasket",
+      "triangles": 2592,
+      "vertices": 1310
+    },
+    {
+      "name": "seal_lip",
+      "triangles": 3840,
+      "vertices": 1920
+    },
+    {
+      "name": "pzt_seal_sensor",
+      "triangles": 480,
+      "vertices": 492
+    },
+    {
+      "name": "oronasal_cup",
+      "triangles": 8852,
+      "vertices": 5359
+    },
+    {
+      "name": "canister_collar",
+      "triangles": 352,
+      "vertices": 352
+    },
+    {
+      "name": "pzt_blower_stack",
+      "triangles": 528,
+      "vertices": 530
+    },
+    {
+      "name": "uvc_reactor_housing",
+      "triangles": 128,
+      "vertices": 178
+    },
+    {
+      "name": "uv_status_band",
+      "triangles": 352,
+      "vertices": 352
+    },
+    {
+      "name": "uvc_led_array",
+      "triangles": 896,
+      "vertices": 928
+    },
+    {
+      "name": "pzt_capsid_ring",
+      "triangles": 176,
+      "vertices": 178
+    },
+    {
+      "name": "filter_cartridge",
+      "triangles": 208,
+      "vertices": 330
+    },
+    {
+      "name": "pzt_coalescer",
+      "triangles": 352,
+      "vertices": 352
+    },
+    {
+      "name": "intake_grille",
+      "triangles": 792,
+      "vertices": 794
+    },
+    {
+      "name": "controller_band",
+      "triangles": 364,
+      "vertices": 376
+    },
+    {
+      "name": "status_strip",
+      "triangles": 12,
+      "vertices": 24
+    },
+    {
+      "name": "exhale_valve",
+      "triangles": 192,
+      "vertices": 304
+    },
+    {
+      "name": "valve_diaphragm",
+      "triangles": 320,
+      "vertices": 324
+    },
+    {
+      "name": "pzt_harvester",
+      "triangles": 256,
+      "vertices": 260
+    },
+    {
+      "name": "strap_anchor",
+      "triangles": 1600,
+      "vertices": 928
+    },
+    {
+      "name": "vent_slats",
+      "triangles": 120,
+      "vertices": 240
+    },
+    {
+      "name": "dragon_scales",
+      "triangles": 6148,
+      "vertices": 5512
+    },
+    {
+      "name": "horn_cell",
+      "triangles": 144,
+      "vertices": 288
+    },
+    {
+      "name": "solar_horn",
+      "triangles": 624,
+      "vertices": 364
+    },
+    {
+      "name": "pv_array",
+      "triangles": 168,
+      "vertices": 336
+    },
+    {
+      "name": "crest_keel",
+      "triangles": 220,
+      "vertices": 132
+    },
+    {
+      "name": "crest_antenna",
+      "triangles": 108,
+      "vertices": 216
+    },
+    {
+      "name": "el_wire",
+      "triangles": 6336,
+      "vertices": 3518
+    },
+    {
+      "name": "face_form",
+      "triangles": 18880,
+      "vertices": 9726
+    }
+  ],
+  "validate": {
+    "ok": true,
+    "failed": []
+  }
+}

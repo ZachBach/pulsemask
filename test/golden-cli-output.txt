@@ -1,0 +1,15 @@
+
+PulseMask · generated geometry
+  face                  140 × 122 mm · rim 548 mm
+  shell                 49 g · 48.3 cm³ PA12
+  dead space            40 mL
+  bead compression      0.80 mm
+  UV-C dose             0.22 mJ/cm² (7% of 3.0 target)
+  log reduction         0.11 LRV · 17 LEDs · dwell 27.6 ms
+  solar                 0.32 W peak vs 1.48 W load
+  runtime               3.5 h · 4.5 h solar · 14.8 h gated
+  mesh                  30 parts · 81.2k triangles
+
+  ⚠ dose is below the 2-log target. Length alone will not fix this —
+    dose ≈ P·η·ρ·r / 2Q, so raise --leds, --power, --refl, or drop --flow.
+
