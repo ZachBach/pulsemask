@@ -1,0 +1,99 @@
+{
+  "$schema": "dose-budget-vectors/1",
+  "version": 1,
+  "frozenAgainst": {
+    "engineCommit": "0605893",
+    "engineFile": "mask-geometry.js",
+    "metricsBlock": "lines 1139-1146 at that commit",
+    "note": "Track B (DB-04/DB-10/DB-38). Expected values are HAND-DERIVED in validation/dose-budget/model-audit.md, not copied from the engine. Tolerances: hand vs independent 1e-3 relative; independent vs engine 1e-9 relative."
+  },
+  "operatingRange": {
+    "flowLpm": [30, 120],
+    "ledPower": [4, 30],
+    "reactorLen": [0.018, 0.120],
+    "reflectance": [1, 6],
+    "ledDensityPer10mm": [2, 14]
+  },
+  "vectors": [
+    {
+      "id": "nominal-engine-defaults",
+      "case": "nominal",
+      "params": {},
+      "hand": { "dwellMS": 27.566, "irradiance": 7.4069, "uvDose": 0.20418, "lrv": 0.10639 }
+    },
+    {
+      "id": "nominal-cli-17-leds",
+      "case": "nominal",
+      "params": { "ledCount": 17 },
+      "hand": { "dwellMS": 27.566, "irradiance": 7.8698, "uvDose": 0.21694, "lrv": 0.11304 }
+    },
+    {
+      "id": "max-flow-120",
+      "case": "maximum-flow",
+      "params": { "flowLpm": 120 },
+      "hand": { "dwellMS": 19.526, "irradiance": 7.4069, "uvDose": 0.14462, "lrv": 0.07536 }
+    },
+    {
+      "id": "min-flow-30",
+      "case": "minimum-flow",
+      "params": { "flowLpm": 30 },
+      "hand": { "dwellMS": 78.103, "irradiance": 7.4069, "uvDose": 0.57850, "lrv": 0.30143 }
+    },
+    {
+      "id": "length-invariance-120mm-16-leds",
+      "case": "length-invariance",
+      "params": { "reactorLen": 0.120, "ledCount": 16 },
+      "hand": { "dwellMS": 118.139, "irradiance": 1.7283, "uvDose": 0.20418, "lrv": 0.10639 },
+      "note": "Same dose as nominal: length cancels (HANDOFF section 8.1). Only dwell and irradiance move."
+    },
+    {
+      "id": "max-length-at-default-density",
+      "case": "maximum-length",
+      "params": { "reactorLen": 0.120, "ledCount": 72 },
+      "hand": { "dwellMS": 118.139, "irradiance": 7.7773, "uvDose": 0.91879, "lrv": 0.47875 },
+      "note": "72 = round(6 per 10 mm x 120 mm), the UI/CLI density derivation."
+    },
+    {
+      "id": "zero-flow",
+      "case": "invalid",
+      "params": { "flowLpm": 0 },
+      "reject": "flowLpm must be > 0",
+      "engineObserved": { "dwellMS": "Infinity", "uvDose": "Infinity", "lrv": "Infinity" }
+    },
+    {
+      "id": "negative-flow",
+      "case": "invalid",
+      "params": { "flowLpm": -85 },
+      "reject": "flowLpm must be > 0",
+      "engineObserved": { "uvDose": -0.204176 }
+    },
+    {
+      "id": "nan-led-power",
+      "case": "invalid",
+      "params": { "ledPower": "NaN" },
+      "reject": "ledPower must be finite",
+      "engineObserved": { "uvDose": "NaN", "lrv": "NaN" }
+    },
+    {
+      "id": "zero-leds",
+      "case": "invalid",
+      "params": { "ledCount": 0 },
+      "reject": "ledCount must be an integer >= 1",
+      "engineObserved": { "uvDose": 0, "lrv": 0 }
+    },
+    {
+      "id": "sub-unity-gain",
+      "case": "invalid",
+      "params": { "reflectance": 0.5 },
+      "reject": "reflectance (cavity gain) must be >= 1",
+      "engineObserved": { "uvDose": 0.039265 }
+    },
+    {
+      "id": "zero-reactor-length",
+      "case": "invalid",
+      "params": { "reactorLen": 0 },
+      "reject": "reactorLen must be > 0",
+      "engineObserved": { "dwellMS": 0, "irradiance": "Infinity", "uvDose": "NaN" }
+    }
+  ]
+}
