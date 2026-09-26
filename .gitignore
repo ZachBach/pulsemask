@@ -63,3 +63,7 @@ tmp/
 *.tmp
 *.bak
 *~
+
+# Git worktrees checked out from this repo. Each is its own working copy;
+# committing one would embed a broken gitlink.
+.worktrees/
